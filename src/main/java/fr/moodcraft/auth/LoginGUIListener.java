@@ -1,26 +1,29 @@
-@EventHandler
-public void onClick(InventoryClickEvent e) {
+package fr.moodcraft.auth;
 
-    if (!(e.getWhoClicked() instanceof Player p)) return;
+import org.bukkit.event.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.entity.Player;
 
-    if (!e.getView().getTitle().equals("§6Authentification")) return;
+public class LoginGUIListener implements Listener {
 
-    e.setCancelled(true);
+    @EventHandler
+    public void onClick(InventoryClickEvent e) {
 
-    p.closeInventory();
+        if (!(e.getWhoClicked() instanceof Player p)) return;
+        if (!e.getView().getTitle().equals("§6Authentification")) return;
 
-    if (AuthManager.isRegistered(p.getUniqueId().toString())) {
+        e.setCancelled(true);
+        p.closeInventory();
 
-        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
-        p.sendMessage("§eConnexion requise");
-        p.sendMessage("§7➡ §f/login <motdepasse>");
-        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        if (AuthManager.isRegistered(p.getUniqueId().toString())) {
 
-    } else {
+            AuthListener.waitingLogin.add(p);
+            p.sendMessage("§e🔐 Entre ton mot de passe dans le chat");
 
-        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
-        p.sendMessage("§eCréation de compte");
-        p.sendMessage("§7➡ §f/register <motdepasse>");
-        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        } else {
+
+            AuthListener.waitingRegister.add(p);
+            p.sendMessage("§e🆕 Choisis ton mot de passe dans le chat");
+        }
     }
 }
