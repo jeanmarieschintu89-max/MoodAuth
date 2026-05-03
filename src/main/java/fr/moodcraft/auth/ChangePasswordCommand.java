@@ -11,7 +11,8 @@ public class ChangePasswordCommand implements CommandExecutor {
         if (!(sender instanceof Player p)) return true;
 
         if (args.length < 2) {
-            p.sendMessage("§c/changepassword <ancien> <nouveau>");
+            p.sendMessage("§c⚠ Informations manquantes.");
+            p.sendMessage("§7Utilisation : §e/changepassword <ancien> <nouveau>");
             return true;
         }
 
@@ -22,11 +23,13 @@ public class ChangePasswordCommand implements CommandExecutor {
         );
 
         if (!success) {
-            p.sendMessage("§cMot de passe incorrect.");
+            p.sendMessage("§c❌ Ancien mot de passe incorrect.");
             return true;
         }
 
-        p.sendMessage("§aMot de passe changé !");
+        p.sendMessage("§a✔ Mot de passe mis à jour !");
+        p.sendMessage("§7Ton compte est maintenant sécurisé.");
+
         return true;
     }
 }
