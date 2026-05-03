@@ -1,4 +1,3 @@
-
 package fr.moodcraft.auth;
 
 import org.bukkit.event.*;
@@ -12,8 +11,6 @@ import java.util.Set;
 public class AuthListener implements Listener {
 
     private static final Set<Player> logged = new HashSet<>();
-    private static final Set<Player> waitingLogin = new HashSet<>();
-    private static final Set<Player> waitingRegister = new HashSet<>();
 
     public static boolean isLogged(Player p) {
         return logged.contains(p);
@@ -24,14 +21,12 @@ public class AuthListener implements Listener {
 
         p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
         p.sendMessage("§a✔ Connexion réussie !");
-        p.sendMessage("§7Bon jeu sur §eMoodCraft ✨");
+        p.sendMessage("§7Bienvenue sur §eMoodCraft ✨");
         p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
     }
 
     public static void logout(Player p) {
         logged.remove(p);
-        waitingLogin.remove(p);
-        waitingRegister.remove(p);
     }
 
     @EventHandler
@@ -44,16 +39,11 @@ public class AuthListener implements Listener {
         p.sendMessage("§6Bienvenue sur §eMoodCraft ✨");
 
         if (AuthManager.isRegistered(p.getUniqueId().toString())) {
-
-            p.sendMessage("§eTon compte existe déjà.");
-            p.sendMessage("§7➡ §fConnecte-toi avec : §e/login <motdepasse>");
-
+            p.sendMessage("§eCompte détecté.");
+            p.sendMessage("§7➡ §f/login <motdepasse>");
         } else {
-
-            waitingRegister.add(p);
-
-            p.sendMessage("§eAucun compte trouvé.");
-            p.sendMessage("§7➡ §fTape directement ton mot de passe pour créer ton compte");
+            p.sendMessage("§eNouveau joueur !");
+            p.sendMessage("§7➡ §fTape ton mot de passe pour créer ton compte");
         }
 
         p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
@@ -80,38 +70,10 @@ public class AuthListener implements Listener {
 
         String msg = e.getMessage().toLowerCase();
 
-        if (msg.startsWith("/login")) {
-
-            String[] args = msg.split(" ");
-
-            if (args.length < 2) {
-                p.sendMessage("§cUsage: /login <motdepasse>");
-                return;
-            }
-
-            waitingLogin.add(p);
-            p.chat(args[1]);
+        if (!msg.startsWith("/login") && !msg.startsWith("/register")) {
             e.setCancelled(true);
-            return;
+            p.sendMessage("§c⚠ Connecte-toi avec /login");
         }
-
-        if (msg.startsWith("/register")) {
-
-            String[] args = msg.split(" ");
-
-            if (args.length < 2) {
-                p.sendMessage("§cUsage: /register <motdepasse>");
-                return;
-            }
-
-            waitingRegister.add(p);
-            p.chat(args[1]);
-            e.setCancelled(true);
-            return;
-        }
-
-        e.setCancelled(true);
-        p.sendMessage("§cTu dois te connecter.");
     }
 
     @EventHandler
@@ -126,31 +88,20 @@ public class AuthListener implements Listener {
 
         String ip = p.getAddress().getAddress().getHostAddress();
 
-        // LOGIN
         if (AuthManager.isRegistered(p.getUniqueId().toString())) {
 
-            if (waitingLogin.isEmpty()) {
-                p.sendMessage("§e➡ Tape /login <motdepasse>");
-                return;
-            }
-
             if (AuthManager.login(p.getUniqueId().toString(), p.getName(), msg, ip)) {
-
-                waitingLogin.remove(p);
                 login(p);
-
             } else {
                 p.sendMessage("§cMot de passe incorrect.");
             }
 
-            return;
+        } else {
+
+            AuthManager.register(p.getUniqueId().toString(), p.getName(), msg, ip);
+            login(p);
+            p.sendMessage("§aCompte créé !");
         }
-
-        // REGISTER
-        AuthManager.register(p.getUniqueId().toString(), p.getName(), msg, ip);
-        login(p);
-
-        p.sendMessage("§aCompte créé !");
     }
 
     @EventHandler
