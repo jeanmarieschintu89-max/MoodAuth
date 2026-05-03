@@ -2,6 +2,7 @@ package fr.moodcraft.auth;
 
 import org.bukkit.event.*;
 import org.bukkit.event.player.*;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.entity.Player;
 
 import java.util.HashSet;
@@ -11,6 +12,9 @@ public class AuthListener implements Listener {
 
     private static final Set<Player> logged = new HashSet<>();
 
+    // =========================
+    // 🔐 LOGIN STATE
+    // =========================
     public static boolean isLogged(Player p) {
         return logged.contains(p);
     }
@@ -19,35 +23,109 @@ public class AuthListener implements Listener {
         logged.add(p);
     }
 
+    public static void logout(Player p) {
+        logged.remove(p);
+    }
+
+    // =========================
+    // 👋 JOIN
+    // =========================
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
 
         Player p = e.getPlayer();
 
-        logged.remove(p);
+        logout(p);
+
+        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        p.sendMessage("§6Bienvenue sur §eMoodCraft ✨");
 
         if (AuthManager.isRegistered(p.getUniqueId().toString())) {
-            p.sendMessage("§e/login <motdepasse>");
+
+            p.sendMessage("§eTon compte existe déjà.");
+            p.sendMessage("§7➡ §fConnecte-toi avec : §e/login <motdepasse>");
+
         } else {
-            p.sendMessage("§e/register <motdepasse>");
+
+            p.sendMessage("§eAucun compte trouvé.");
+            p.sendMessage("§7➡ §fCrée-en un avec : §e/register <motdepasse>");
+        }
+
+        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+    }
+
+    // =========================
+    // 🚶 BLOCAGE MOUVEMENT
+    // =========================
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        if (!isLogged(e.getPlayer())) {
+            e.setCancelled(true);
         }
     }
 
-    @EventHandler
-    public void onMove(PlayerMoveEvent e) {
-        if (!isLogged(e.getPlayer())) e.setCancelled(true);
-    }
-
+    // =========================
+    // 💬 BLOCAGE COMMANDES
+    // =========================
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent e) {
 
-        if (isLogged(e.getPlayer())) return;
+        Player p = e.getPlayer();
+
+        if (isLogged(p)) return;
 
         String msg = e.getMessage().toLowerCase();
 
         if (!msg.startsWith("/login") && !msg.startsWith("/register")) {
+
             e.setCancelled(true);
-            e.getPlayer().sendMessage("§cConnecte-toi d'abord.");
+
+            p.sendMessage("§c⚠ Tu dois te connecter avant de jouer.");
+            p.sendMessage("§7Utilise : §e/login <motdepasse>");
         }
+    }
+
+    // =========================
+    // ❤️ BLOCAGE DÉGÂTS
+    // =========================
+    @EventHandler
+    public void onDamage(EntityDamageEvent e) {
+
+        if (e.getEntity() instanceof Player p) {
+
+            if (!isLogged(p)) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    // =========================
+    // 🗑️ BLOCAGE DROP
+    // =========================
+    @EventHandler
+    public void onDrop(PlayerDropItemEvent e) {
+
+        if (!isLogged(e.getPlayer())) {
+            e.setCancelled(true);
+        }
+    }
+
+    // =========================
+    // 🖱️ BLOCAGE INTERACTION
+    // =========================
+    @EventHandler
+    public void onInteract(PlayerInteractEvent e) {
+
+        if (!isLogged(e.getPlayer())) {
+            e.setCancelled(true);
+        }
+    }
+
+    // =========================
+    // 🚪 QUIT CLEAN
+    // =========================
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        logout(e.getPlayer());
     }
 }
