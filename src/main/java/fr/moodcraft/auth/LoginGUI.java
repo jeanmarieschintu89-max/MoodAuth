@@ -14,25 +14,14 @@ public class LoginGUI {
         boolean registered = AuthManager.isRegistered(p.getUniqueId().toString());
 
         if (registered) {
-
-            inv.setItem(13, ItemBuilder.create(
-                    Material.LIME_CONCRETE,
+            inv.setItem(13, ItemBuilder.create(Material.LIME_CONCRETE,
                     "§aSe connecter",
-                    "§7Ton compte est déjà enregistré",
-                    "",
-                    "§e▶ Clique puis tape",
-                    "§f/login <motdepasse>"
+                    "§7Clique puis entre ton mot de passe"
             ));
-
         } else {
-
-            inv.setItem(13, ItemBuilder.create(
-                    Material.YELLOW_CONCRETE,
+            inv.setItem(13, ItemBuilder.create(Material.YELLOW_CONCRETE,
                     "§eCréer un compte",
-                    "§7Bienvenue nouveau joueur",
-                    "",
-                    "§e▶ Clique puis tape",
-                    "§f/register <motdepasse>"
+                    "§7Clique puis choisis un mot de passe"
             ));
         }
 
