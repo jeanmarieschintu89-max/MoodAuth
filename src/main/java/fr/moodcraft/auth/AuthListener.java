@@ -1,5 +1,6 @@
 package fr.moodcraft.auth;
 
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.*;
 import org.bukkit.event.player.*;
