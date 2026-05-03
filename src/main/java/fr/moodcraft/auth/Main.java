@@ -22,7 +22,8 @@ public class Main extends JavaPlugin {
         getCommand("changepassword").setExecutor(new ChangePasswordCommand());
 
         getServer().getPluginManager().registerEvents(new AuthListener(), this);
+        getServer().getPluginManager().registerEvents(new LoginGUIListener(), this);
 
-        getLogger().info("MoodAuth activé");
+        getLogger().info("MoodAuth actif");
     }
 }
