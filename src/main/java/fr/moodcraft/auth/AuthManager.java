@@ -31,20 +31,43 @@ public class AuthManager {
         return config.contains(uuid);
     }
 
-    public static void register(String uuid, String password) {
-        config.set(uuid, hash(password));
+    public static void register(String uuid, String name, String password, String ip) {
+
+        config.set(uuid + ".name", name);
+        config.set(uuid + ".password", hash(password));
+        config.set(uuid + ".last-ip", ip);
+
         save();
     }
 
-    public static boolean login(String uuid, String password) {
-        return config.getString(uuid).equals(hash(password));
+    public static boolean login(String uuid, String name, String password, String ip) {
+
+        String saved = config.getString(uuid + ".password");
+
+        if (saved == null || !saved.equals(hash(password))) return false;
+
+        config.set(uuid + ".name", name);
+
+        String oldIp = config.getString(uuid + ".last-ip");
+
+        if (oldIp != null && !oldIp.equals(ip)) {
+            System.out.println("[MoodAuth] Nouvelle IP pour " + name + " : " + ip);
+        }
+
+        config.set(uuid + ".last-ip", ip);
+
+        save();
+
+        return true;
     }
 
     public static boolean changePassword(String uuid, String oldPass, String newPass) {
 
-        if (!login(uuid, oldPass)) return false;
+        String saved = config.getString(uuid + ".password");
 
-        config.set(uuid, hash(newPass));
+        if (saved == null || !saved.equals(hash(oldPass))) return false;
+
+        config.set(uuid + ".password", hash(newPass));
         save();
 
         return true;
