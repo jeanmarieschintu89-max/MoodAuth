@@ -7,7 +7,6 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.Particle.DustOptions;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,24 +31,29 @@ public class AuthListener implements Listener {
         // 💣 clean
         for (int i = 0; i < 40; i++) p.sendMessage("");
 
-        // 💥 explosion verte
+        // ✨ effet premium doux
         p.getWorld().spawnParticle(
-                Particle.REDSTONE,
+                Particle.END_ROD,
                 p.getLocation(),
-                120,
-                1, 1, 1,
-                new DustOptions(Color.fromRGB(0,255,70), 2)
+                40,
+                0.4, 1, 0.4,
+                0
         );
 
-        // 🎉 final
-        p.sendTitle("§aMood §eCraft", "§aConnexion réussie", 5, 40, 10);
+        // 🎉 titre premium
+        p.sendTitle("§f§lMood §6§lCraft", "§7Connexion réussie", 10, 40, 10);
 
+        // 📜 message RP propre
         p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
-        p.sendMessage("§a✔ Accès autorisé");
-        p.sendMessage("§7Bienvenue dans §aMood §eCraft");
+        p.sendMessage("§6Bienvenue sur §fMoodCraft");
+        p.sendMessage("");
+        p.sendMessage("§7✔ Vous êtes maintenant connecté");
+        p.sendMessage("§7Profitez de l'économie et des contrats");
+        p.sendMessage("");
+        p.sendMessage("§e➜ Utilisez §f/menu §epour commencer");
         p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 
-        p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f);
+        p.playSound(p.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 1f, 1f);
     }
 
     public static void logout(Player p) {
@@ -72,46 +76,42 @@ public class AuthListener implements Listener {
         p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 9999, 10));
 
         startAura(p);
-        startMatrixRain(p);
 
-        // 💣 wipe de secours APRÈS les plugins
+        // 💣 wipe propre
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
-            for (int i = 0; i < 80; i++) p.sendMessage("");
+            for (int i = 0; i < 60; i++) p.sendMessage("");
             p.resetTitle();
         }, 2L);
 
-        // 🎬 intro
+        // 🎬 intro douce
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
-            p.sendTitle("", "§8Connexion au système...", 0, 30, 10);
-            p.playSound(p.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1f, 0.5f);
+            p.sendTitle("§f§lMood §6§lCraft", "§7Chargement...", 10, 40, 10);
+            p.playSound(p.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 1f, 0.8f);
         }, 40L);
-
-        Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
-            p.sendTitle("§a§lMood §e§lCraft", "§2[ ACCÈS SÉCURISÉ ]", 5, 40, 10);
-            p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f);
-        }, 80L);
 
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
 
             for (int i = 0; i < 30; i++) p.sendMessage("");
 
             p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
-            p.sendMessage("§a§lMood §e§lCraft");
+            p.sendMessage("§6Bienvenue sur §fMoodCraft");
             p.sendMessage("");
 
             if (AuthManager.isRegistered(p.getUniqueId().toString())) {
-                p.sendMessage("§2> Connexion requise");
-                p.sendMessage("§f➜ §a/login <motdepasse>");
+                p.sendMessage("§7Veuillez vous connecter");
+                p.sendMessage("§e➜ §f/login <motdepasse>");
             } else {
-                p.sendMessage("§2> Création de compte");
-                p.sendMessage("§f➜ Tape ton mot de passe");
+                p.sendMessage("§7Création de votre compte");
+                p.sendMessage("§e➜ Entrez un mot de passe dans le chat");
             }
 
+            p.sendMessage("");
+            p.sendMessage("§7Votre progression sera sauvegardée");
             p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 
-        }, 120L);
+        }, 100L);
 
-        // 🔁 actionbar animée
+        // actionbar propre
         Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
 
             if (isLogged(p) || !p.isOnline()) {
@@ -119,13 +119,13 @@ public class AuthListener implements Listener {
                 return;
             }
 
-            p.sendActionBar("§2[ SYSTEM ] §aConnexion en attente...");
+            p.sendActionBar("§6MoodCraft §8• §7Connexion requise");
 
-        }, 120L, 40L);
+        }, 100L, 40L);
     }
 
     // =========================
-    // ✨ AURA
+    // ✨ AURA PREMIUM
     // =========================
     private void startAura(Player p) {
 
@@ -138,57 +138,19 @@ public class AuthListener implements Listener {
 
             Location loc = p.getLocation().clone().add(0, 1, 0);
 
-            for (int i = 0; i < 20; i++) {
-                double angle = 2 * Math.PI * i / 20;
+            for (int i = 0; i < 10; i++) {
+                double angle = 2 * Math.PI * i / 10;
                 double x = Math.cos(angle);
                 double z = Math.sin(angle);
 
                 p.getWorld().spawnParticle(
-                        Particle.PORTAL,
+                        Particle.END_ROD,
                         loc.clone().add(x, 0, z),
-                        2
+                        1
                 );
             }
 
-        }, 0L, 5L);
-    }
-
-    // =========================
-    // 🟢 MATRIX RAIN
-    // =========================
-    private void startMatrixRain(Player p) {
-
-        DustOptions green = new DustOptions(Color.fromRGB(0,255,70), 1.2f);
-
-        Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
-
-            if (isLogged(p) || !p.isOnline()) {
-                task.cancel();
-                return;
-            }
-
-            Location base = p.getLocation().clone().add(0, 3, 0);
-
-            for (int i = 0; i < 20; i++) {
-
-                double x = (Math.random() - 0.5) * 4;
-                double z = (Math.random() - 0.5) * 4;
-                double y = Math.random() * 3;
-
-                Location loc = base.clone().add(x, y, z);
-
-                for (int j = 0; j < 6; j++) {
-                    p.getWorld().spawnParticle(
-                            Particle.REDSTONE,
-                            loc.clone().subtract(0, j * 0.3, 0),
-                            1,
-                            0, 0, 0,
-                            green
-                    );
-                }
-            }
-
-        }, 0L, 3L);
+        }, 0L, 10L);
     }
 
     // =========================
@@ -206,7 +168,6 @@ public class AuthListener implements Listener {
         }
     }
 
-    // bloque toutes commandes sauf login/register
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCommand(PlayerCommandPreprocessEvent e) {
 
@@ -218,11 +179,10 @@ public class AuthListener implements Listener {
 
         if (!msg.startsWith("/login") && !msg.startsWith("/l") && !msg.startsWith("/register")) {
             e.setCancelled(true);
-            p.sendMessage("§c🔒 Connecte-toi avec /login");
+            p.sendMessage("§cVeuillez vous connecter avec /login");
         }
     }
 
-    // bloque tout chat entrant AVANT affichage
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent e) {
 
@@ -240,14 +200,13 @@ public class AuthListener implements Listener {
             if (AuthManager.login(p.getUniqueId().toString(), p.getName(), msg, ip)) {
                 login(p);
             } else {
-                p.sendMessage("§c❌ Mot de passe incorrect");
+                p.sendMessage("§cMot de passe incorrect");
             }
 
         } else {
 
             AuthManager.register(p.getUniqueId().toString(), p.getName(), msg, ip);
-            login(p);
-            p.sendMessage("§a✔ Compte créé !");
+            login(p); // ✔ PAS de double message
         }
     }
 
