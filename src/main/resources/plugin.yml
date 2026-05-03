@@ -5,5 +5,16 @@ api-version: 1.20
 
 commands:
   login:
+    description: Se connecter
+    usage: /login <motdepasse>
+    aliases: [l]
+
   register:
+    description: Créer un compte
+    usage: /register <motdepasse>
+    aliases: [reg]
+
   changepassword:
+    description: Changer son mot de passe
+    usage: /changepassword <ancien> <nouveau>
+    aliases: [changepass, cp]
