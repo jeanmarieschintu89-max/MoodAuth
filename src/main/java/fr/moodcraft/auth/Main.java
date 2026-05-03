@@ -23,6 +23,6 @@ public class Main extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new AuthListener(), this);
 
-        getLogger().info("MoodAuth Premium chargé ✔");
+        getLogger().info("MoodAuth Premium (No GUI) chargé ✔");
     }
 }
