@@ -15,14 +15,11 @@ public class ChangePasswordCommand implements CommandExecutor {
             return true;
         }
 
-        String uuid = p.getUniqueId().toString();
-
-        if (!AuthManager.isRegistered(uuid)) {
-            p.sendMessage("§cTu n'es pas enregistré.");
-            return true;
-        }
-
-        boolean success = AuthManager.changePassword(uuid, args[0], args[1]);
+        boolean success = AuthManager.changePassword(
+                p.getUniqueId().toString(),
+                args[0],
+                args[1]
+        );
 
         if (!success) {
             p.sendMessage("§cMot de passe incorrect.");
