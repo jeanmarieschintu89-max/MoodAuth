@@ -67,20 +67,20 @@ public class AuthListener implements Listener {
 
         e.setJoinMessage(null);
 
-        // écran noir + freeze
+        // 🔒 freeze + écran noir
         p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 9999, 1));
         p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 9999, 10));
 
         startAura(p);
         startMatrixRain(p);
 
-        // nettoyage messages plugins
+        // 💣 wipe de secours APRÈS les plugins
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
             for (int i = 0; i < 80; i++) p.sendMessage("");
             p.resetTitle();
-        }, 20L);
+        }, 2L);
 
-        // intro
+        // 🎬 intro
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
             p.sendTitle("", "§8Connexion au système...", 0, 30, 10);
             p.playSound(p.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1f, 0.5f);
@@ -111,7 +111,7 @@ public class AuthListener implements Listener {
 
         }, 120L);
 
-        // actionbar animée
+        // 🔁 actionbar animée
         Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
 
             if (isLogged(p) || !p.isOnline()) {
@@ -206,6 +206,7 @@ public class AuthListener implements Listener {
         }
     }
 
+    // bloque toutes commandes sauf login/register
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCommand(PlayerCommandPreprocessEvent e) {
 
@@ -221,10 +222,8 @@ public class AuthListener implements Listener {
         }
     }
 
-    // =========================
-    // 💬 LOGIN CHAT
-    // =========================
-    @EventHandler(priority = EventPriority.HIGHEST)
+    // bloque tout chat entrant AVANT affichage
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent e) {
 
         Player p = e.getPlayer();
