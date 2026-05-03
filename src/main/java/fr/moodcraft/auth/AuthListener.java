@@ -12,6 +12,8 @@ import java.util.Set;
 public class AuthListener implements Listener {
 
     private static final Set<Player> logged = new HashSet<>();
+    public static final Set<Player> waitingLogin = new HashSet<>();
+    public static final Set<Player> waitingRegister = new HashSet<>();
 
     public static boolean isLogged(Player p) {
         return logged.contains(p);
@@ -20,12 +22,16 @@ public class AuthListener implements Listener {
     public static void login(Player p) {
         logged.add(p);
 
+        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
         p.sendMessage("§a✔ Connexion réussie !");
-        p.sendMessage("§7Bon jeu sur §eMoodCraft ✨");
+        p.sendMessage("§7Bienvenue sur §eMoodCraft ✨");
+        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
     }
 
     public static void logout(Player p) {
         logged.remove(p);
+        waitingLogin.remove(p);
+        waitingRegister.remove(p);
     }
 
     @EventHandler
@@ -34,18 +40,18 @@ public class AuthListener implements Listener {
         Player p = e.getPlayer();
         logout(p);
 
-        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
         p.sendMessage("§6Bienvenue sur §eMoodCraft ✨");
 
         if (AuthManager.isRegistered(p.getUniqueId().toString())) {
-            p.sendMessage("§eTon compte existe déjà.");
-            p.sendMessage("§7➡ §fConnecte-toi via le menu.");
+            p.sendMessage("§eCompte détecté.");
+            p.sendMessage("§7Clique dans le menu pour te connecter.");
         } else {
-            p.sendMessage("§eAucun compte trouvé.");
-            p.sendMessage("§7➡ §fCrée ton compte via le menu.");
+            p.sendMessage("§eNouveau joueur !");
+            p.sendMessage("§7Crée ton compte via le menu.");
         }
 
-        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
             LoginGUI.open(p);
@@ -74,11 +80,48 @@ public class AuthListener implements Listener {
         String msg = e.getMessage().toLowerCase();
 
         if (!msg.startsWith("/login") && !msg.startsWith("/register")) {
-
             e.setCancelled(true);
+            p.sendMessage("§c⚠ Connecte-toi via le menu.");
+        }
+    }
 
-            p.sendMessage("§c⚠ Tu dois te connecter avant de jouer.");
-            p.sendMessage("§7Utilise le menu ou : §e/login <motdepasse>");
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent e) {
+
+        Player p = e.getPlayer();
+        if (isLogged(p)) return;
+
+        String msg = e.getMessage();
+        e.setCancelled(true);
+
+        // LOGIN
+        if (waitingLogin.contains(p)) {
+
+            String ip = p.getAddress().getAddress().getHostAddress();
+
+            if (AuthManager.login(p.getUniqueId().toString(), p.getName(), msg, ip)) {
+
+                waitingLogin.remove(p);
+                login(p);
+
+            } else {
+                p.sendMessage("§cMot de passe incorrect.");
+            }
+
+            return;
+        }
+
+        // REGISTER
+        if (waitingRegister.contains(p)) {
+
+            String ip = p.getAddress().getAddress().getHostAddress();
+
+            AuthManager.register(p.getUniqueId().toString(), p.getName(), msg, ip);
+
+            waitingRegister.remove(p);
+            login(p);
+
+            p.sendMessage("§aCompte créé avec succès !");
         }
     }
 
@@ -89,11 +132,9 @@ public class AuthListener implements Listener {
 
         if (isLogged(p)) return;
 
-        if (e.getView().getTitle().equals("§6Authentification")) {
-            Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
-                LoginGUI.open(p);
-            }, 5L);
-        }
+        Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
+            LoginGUI.open(p);
+        }, 5L);
     }
 
     @EventHandler
