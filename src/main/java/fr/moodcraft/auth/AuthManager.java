@@ -1,7 +1,6 @@
 package fr.moodcraft.auth;
 
 import org.bukkit.configuration.file.YamlConfiguration;
-
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -32,11 +31,9 @@ public class AuthManager {
     }
 
     public static void register(String uuid, String name, String password, String ip) {
-
         config.set(uuid + ".name", name);
         config.set(uuid + ".password", hash(password));
-        config.set(uuid + ".last-ip", ip);
-
+        config.set(uuid + ".ip", ip);
         save();
     }
 
@@ -47,17 +44,9 @@ public class AuthManager {
         if (saved == null || !saved.equals(hash(password))) return false;
 
         config.set(uuid + ".name", name);
-
-        String oldIp = config.getString(uuid + ".last-ip");
-
-        if (oldIp != null && !oldIp.equals(ip)) {
-            System.out.println("[MoodAuth] Nouvelle IP pour " + name + " : " + ip);
-        }
-
-        config.set(uuid + ".last-ip", ip);
+        config.set(uuid + ".ip", ip);
 
         save();
-
         return true;
     }
 
