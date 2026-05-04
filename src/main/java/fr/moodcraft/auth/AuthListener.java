@@ -14,7 +14,6 @@ import java.util.UUID;
 
 public class AuthListener implements Listener {
 
-    // 🔥 FIX CRITIQUE → UUID (plus jamais de bug de détection)
     private static final Set<UUID> logged = new HashSet<>();
 
     public static boolean isLogged(Player p) {
@@ -26,14 +25,11 @@ public class AuthListener implements Listener {
         if (isLogged(p)) return;
         logged.add(p.getUniqueId());
 
-        // 🔓 retire effets
         p.removePotionEffect(PotionEffectType.BLINDNESS);
         p.removePotionEffect(PotionEffectType.SLOW);
 
-        // 💣 clean écran
         for (int i = 0; i < 40; i++) p.sendMessage("");
 
-        // ✨ effet premium léger
         p.getWorld().spawnParticle(
                 Particle.END_ROD,
                 p.getLocation(),
@@ -42,10 +38,8 @@ public class AuthListener implements Listener {
                 0
         );
 
-        // 🎬 titre
         p.sendTitle("§a§lMood§e§lCraft", "§aConnexion réussie", 10, 40, 10);
 
-        // 💎 MESSAGE PREMIUM
         p.sendMessage("");
         p.sendMessage("§8╔════════════════════════════╗");
         p.sendMessage("§8║   §a§lMood§e§lCraft §8• §6Accès validé");
@@ -79,7 +73,6 @@ public class AuthListener implements Listener {
 
         e.setJoinMessage(null);
 
-        // 🔒 freeze + écran noir
         p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 9999, 1));
         p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 9999, 10));
 
@@ -90,12 +83,10 @@ public class AuthListener implements Listener {
             p.resetTitle();
         }, 2L);
 
-        // 🎬 intro
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
             p.sendTitle("§a§lMood§e§lCraft", "§7Chargement...", 10, 40, 10);
         }, 40L);
 
-        // 🔐 LOGIN SCREEN PREMIUM
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
 
             for (int i = 0; i < 30; i++) p.sendMessage("");
@@ -127,7 +118,6 @@ public class AuthListener implements Listener {
 
         }, 100L);
 
-        // 🔔 actionbar
         Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
 
             if (isLogged(p) || !p.isOnline()) {
@@ -140,9 +130,6 @@ public class AuthListener implements Listener {
         }, 100L, 40L);
     }
 
-    // =========================
-    // ✨ AURA
-    // =========================
     private void startAura(Player p) {
 
         Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
@@ -184,7 +171,7 @@ public class AuthListener implements Listener {
         }
     }
 
-    // 🔥 FIX → ne bloque QUE si PAS connecté
+    // 🔥 FIX IMPORTANT ICI
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCommand(PlayerCommandPreprocessEvent e) {
 
@@ -194,10 +181,17 @@ public class AuthListener implements Listener {
 
         String msg = e.getMessage().toLowerCase();
 
-        if (!msg.startsWith("/login") && !msg.startsWith("/register")) {
-            e.setCancelled(true);
-            p.sendMessage("§c➜ Connecte-toi avec §e/login");
+        // ✅ commandes autorisées AVANT login
+        if (msg.startsWith("/login")
+                || msg.startsWith("/register")
+                || msg.startsWith("/l")
+                || msg.startsWith("/topgui")
+                || msg.startsWith("/menu")) {
+            return;
         }
+
+        e.setCancelled(true);
+        p.sendMessage("§c➜ Connecte-toi avec §e/login");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
