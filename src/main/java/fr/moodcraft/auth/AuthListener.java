@@ -54,7 +54,7 @@ public class AuthListener implements Listener {
     }
 
     // =========================
-    // 🎬 JOIN PREMIUM
+    // 🎬 JOIN
     // =========================
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(PlayerJoinEvent e) {
@@ -195,16 +195,15 @@ public class AuthListener implements Listener {
     }
 
     // =========================
-    // 💬 CHAT AUTH (FIX INPUT)
+    // 💬 CHAT AUTH (FIX FINAL)
     // =========================
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent e) {
 
         Player p = e.getPlayer();
 
-        // 🔥 FIX CRITIQUE → laisse passer les inputs système
-        if (fr.moodcraft.bridge.InputManager.has(p)
-                || fr.moodcraft.bridge.AmountInputManager.has(p)) {
+        // 🔥 FIX CRITIQUE → laisse passer les inputs des autres plugins
+        if (p.hasMetadata("input_active")) {
             return;
         }
 
