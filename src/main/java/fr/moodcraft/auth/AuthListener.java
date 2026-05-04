@@ -34,6 +34,7 @@ public class AuthListener implements Listener {
 
         p.sendTitle("§a§lMood§e§lCraft", "§aConnexion réussie", 10, 50, 10);
 
+        // ✅ ON GARDE SEULEMENT LE TABLEAU (propre)
         p.sendMessage("");
         p.sendMessage("§8╔════════════════════════════╗");
         p.sendMessage("§8║   §a§lMood§e§lCraft §8• §aBienvenue");
@@ -53,9 +54,6 @@ public class AuthListener implements Listener {
         logged.remove(p.getUniqueId());
     }
 
-    // =========================
-    // 🎬 JOIN
-    // =========================
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(PlayerJoinEvent e) {
 
@@ -127,9 +125,6 @@ public class AuthListener implements Listener {
         }, 80L);
     }
 
-    // =========================
-    // ✨ AURA
-    // =========================
     private void startAura(Player p) {
 
         Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
@@ -156,9 +151,6 @@ public class AuthListener implements Listener {
         }, 0L, 10L);
     }
 
-    // =========================
-    // 🔒 BLOQUAGES
-    // =========================
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         if (!isLogged(e.getPlayer())) e.setCancelled(true);
@@ -171,9 +163,6 @@ public class AuthListener implements Listener {
         }
     }
 
-    // =========================
-    // 🔒 COMMANDES
-    // =========================
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCommand(PlayerCommandPreprocessEvent e) {
 
@@ -194,18 +183,13 @@ public class AuthListener implements Listener {
         p.sendMessage("§c➜ Connecte-toi avec §e/login");
     }
 
-    // =========================
-    // 💬 CHAT AUTH (FIX FINAL)
-    // =========================
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent e) {
 
         Player p = e.getPlayer();
 
-        // 🔥 FIX CRITIQUE → laisse passer les inputs des autres plugins
-        if (p.hasMetadata("input_active")) {
-            return;
-        }
+        // 🔥 laisse passer tes systèmes d'input
+        if (p.hasMetadata("input_active")) return;
 
         if (isLogged(p)) return;
 
@@ -225,8 +209,7 @@ public class AuthListener implements Listener {
         } else {
 
             AuthManager.register(p.getUniqueId().toString(), p.getName(), msg, ip);
-            login(p);
-            p.sendMessage("§8[§a✔§8] §aCompte créé !");
+            login(p); // ✅ déjà le message dans login → pas de doublon
         }
     }
 
