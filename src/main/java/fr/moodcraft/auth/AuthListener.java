@@ -10,19 +10,21 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class AuthListener implements Listener {
 
-    private static final Set<Player> logged = new HashSet<>();
+    // 🔥 FIX CRITIQUE → UUID (plus jamais de bug de détection)
+    private static final Set<UUID> logged = new HashSet<>();
 
     public static boolean isLogged(Player p) {
-        return logged.contains(p);
+        return logged.contains(p.getUniqueId());
     }
 
     public static void login(Player p) {
 
-        if (logged.contains(p)) return;
-        logged.add(p);
+        if (isLogged(p)) return;
+        logged.add(p.getUniqueId());
 
         // 🔓 retire effets
         p.removePotionEffect(PotionEffectType.BLINDNESS);
@@ -31,7 +33,7 @@ public class AuthListener implements Listener {
         // 💣 clean écran
         for (int i = 0; i < 40; i++) p.sendMessage("");
 
-        // ✨ particules
+        // ✨ effet premium léger
         p.getWorld().spawnParticle(
                 Particle.END_ROD,
                 p.getLocation(),
@@ -43,26 +45,27 @@ public class AuthListener implements Listener {
         // 🎬 titre
         p.sendTitle("§a§lMood§e§lCraft", "§aConnexion réussie", 10, 40, 10);
 
-        // 💎 MESSAGE BIENVENUE CLEAN
+        // 💎 MESSAGE PREMIUM
         p.sendMessage("");
         p.sendMessage("§8╔════════════════════════════╗");
-        p.sendMessage("§8║   §a§lMood§e§lCraft §8• §bConnexion");
+        p.sendMessage("§8║   §a§lMood§e§lCraft §8• §6Accès validé");
         p.sendMessage("§8╠════════════════════════════╣");
         p.sendMessage("§8║ §a✔ §fBienvenue §e" + p.getName());
         p.sendMessage("§8║");
-        p.sendMessage("§8║ §7Développe ta §6ville");
-        p.sendMessage("§8║ §7Maîtrise tes §amétiers");
-        p.sendMessage("§8║ §7Domine la §ebourse");
+        p.sendMessage("§8║ §7Ta progression est chargée");
+        p.sendMessage("§8║ §7et prête à évoluer.");
+        p.sendMessage("§8║");
+        p.sendMessage("§8║ §7Ville §8• §aMétiers §8• §eBourse");
         p.sendMessage("§8║");
         p.sendMessage("§8║ §6➜ §e/menu §7pour commencer");
         p.sendMessage("§8╚════════════════════════════╝");
         p.sendMessage("");
 
-        p.playSound(p.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 1f, 1f);
+        p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f);
     }
 
     public static void logout(Player p) {
-        logged.remove(p);
+        logged.remove(p.getUniqueId());
     }
 
     // =========================
@@ -82,7 +85,6 @@ public class AuthListener implements Listener {
 
         startAura(p);
 
-        // 💣 clean
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
             for (int i = 0; i < 60; i++) p.sendMessage("");
             p.resetTitle();
@@ -91,10 +93,9 @@ public class AuthListener implements Listener {
         // 🎬 intro
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
             p.sendTitle("§a§lMood§e§lCraft", "§7Chargement...", 10, 40, 10);
-            p.playSound(p.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 1f, 0.8f);
         }, 40L);
 
-        // 🔐 MESSAGE LOGIN
+        // 🔐 LOGIN SCREEN PREMIUM
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
 
             for (int i = 0; i < 30; i++) p.sendMessage("");
@@ -106,9 +107,9 @@ public class AuthListener implements Listener {
 
             if (AuthManager.isRegistered(p.getUniqueId().toString())) {
 
-                p.sendMessage("§8║ §c🔒 §fConnexion requise");
+                p.sendMessage("§8║ §c🔒 §fAccès restreint");
                 p.sendMessage("§8║");
-                p.sendMessage("§8║ §7Entre ton mot de passe :");
+                p.sendMessage("§8║ §7Veuillez vous connecter");
                 p.sendMessage("§8║ §6➜ §e/login <motdepasse>");
                 p.sendMessage("§8║");
 
@@ -120,7 +121,7 @@ public class AuthListener implements Listener {
                 p.sendMessage("§8║");
             }
 
-            p.sendMessage("§8║ §7Tes données sont sauvegardées");
+            p.sendMessage("§8║ §8Vos données sont sécurisées");
             p.sendMessage("§8╚════════════════════════════╝");
             p.sendMessage("");
 
@@ -183,6 +184,7 @@ public class AuthListener implements Listener {
         }
     }
 
+    // 🔥 FIX → ne bloque QUE si PAS connecté
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCommand(PlayerCommandPreprocessEvent e) {
 
@@ -192,7 +194,7 @@ public class AuthListener implements Listener {
 
         String msg = e.getMessage().toLowerCase();
 
-        if (!msg.startsWith("/login") && !msg.startsWith("/l") && !msg.startsWith("/register")) {
+        if (!msg.startsWith("/login") && !msg.startsWith("/register")) {
             e.setCancelled(true);
             p.sendMessage("§c➜ Connecte-toi avec §e/login");
         }
