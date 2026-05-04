@@ -62,7 +62,6 @@ public class AuthListener implements Listener {
         Player p = e.getPlayer();
         logout(p);
 
-        // 🔥 message join premium
         e.setJoinMessage("§8[§a+§8] §e" + p.getName() + " §7a rejoint §aMood§eCraft");
 
         p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 9999, 1));
@@ -70,12 +69,10 @@ public class AuthListener implements Listener {
 
         startAura(p);
 
-        // 🔥 écran loading
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
             p.sendTitle("§a§lMood§e§lCraft", "§7Chargement...", 10, 40, 10);
         }, 40L);
 
-        // 🔥 affichage login/register
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
 
             for (int i = 0; i < 20; i++) p.sendMessage("");
@@ -93,7 +90,6 @@ public class AuthListener implements Listener {
                 p.sendMessage("§8║ §6➜ §e/login <motdepasse>");
                 p.sendMessage("§8║");
 
-                // 🔥 rappel actionbar
                 Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
 
                     if (isLogged(p) || !p.isOnline()) {
@@ -199,15 +195,18 @@ public class AuthListener implements Listener {
     }
 
     // =========================
-    // 💬 CHAT AUTH
+    // 💬 CHAT AUTH (FIX INPUT)
     // =========================
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent e) {
 
         Player p = e.getPlayer();
 
-        // 🔥 laisse passer autres systèmes (banque etc)
-        if (p.hasMetadata("bank_input")) return;
+        // 🔥 FIX CRITIQUE → laisse passer les inputs système
+        if (fr.moodcraft.bridge.InputManager.has(p)
+                || fr.moodcraft.bridge.AmountInputManager.has(p)) {
+            return;
+        }
 
         if (isLogged(p)) return;
 
