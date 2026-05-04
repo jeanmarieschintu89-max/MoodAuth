@@ -24,14 +24,11 @@ public class AuthListener implements Listener {
         if (logged.contains(p)) return;
         logged.add(p);
 
-        // 🔓 retire effets
         p.removePotionEffect(PotionEffectType.BLINDNESS);
         p.removePotionEffect(PotionEffectType.SLOW);
 
-        // 💣 clean
         for (int i = 0; i < 40; i++) p.sendMessage("");
 
-        // ✨ effet premium doux
         p.getWorld().spawnParticle(
                 Particle.END_ROD,
                 p.getLocation(),
@@ -40,18 +37,22 @@ public class AuthListener implements Listener {
                 0
         );
 
-        // 🎉 titre premium
-        p.sendTitle("§f§lMood §6§lCraft", "§7Connexion réussie", 10, 40, 10);
+        p.sendTitle("§f§lMood §6§lCraft", "§aConnexion réussie", 10, 40, 10);
 
-        // 📜 message RP propre
-        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
-        p.sendMessage("§6Bienvenue sur §fMoodCraft");
+        // 🔥 MESSAGE PREMIUM
         p.sendMessage("");
-        p.sendMessage("§7✔ Vous êtes maintenant connecté");
-        p.sendMessage("§7Profitez de l'économie et des contrats");
+        p.sendMessage("§8╔════════════════════════════╗");
+        p.sendMessage("§8║   §6§lMoodCraft §8• §fConnexion");
+        p.sendMessage("§8╠════════════════════════════╣");
+        p.sendMessage("§8║ §a✔ §fAccès autorisé");
+        p.sendMessage("§8║ §7Bienvenue §e" + p.getName());
+        p.sendMessage("§8║");
+        p.sendMessage("§8║ §7Ton aventure économique commence");
+        p.sendMessage("§8║ §7dès maintenant.");
+        p.sendMessage("§8║");
+        p.sendMessage("§8║ §e➜ §f/menu §7pour commencer");
+        p.sendMessage("§8╚════════════════════════════╝");
         p.sendMessage("");
-        p.sendMessage("§e➜ Utilisez §f/menu §epour commencer");
-        p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 
         p.playSound(p.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 1f, 1f);
     }
@@ -61,7 +62,7 @@ public class AuthListener implements Listener {
     }
 
     // =========================
-    // 🎬 JOIN CINEMATIC
+    // JOIN
     // =========================
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(PlayerJoinEvent e) {
@@ -71,47 +72,53 @@ public class AuthListener implements Listener {
 
         e.setJoinMessage(null);
 
-        // 🔒 freeze + écran noir
         p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 9999, 1));
         p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 9999, 10));
 
         startAura(p);
 
-        // 💣 wipe propre
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
             for (int i = 0; i < 60; i++) p.sendMessage("");
             p.resetTitle();
         }, 2L);
 
-        // 🎬 intro douce
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
             p.sendTitle("§f§lMood §6§lCraft", "§7Chargement...", 10, 40, 10);
-            p.playSound(p.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_RESONATE, 1f, 0.8f);
         }, 40L);
 
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
 
             for (int i = 0; i < 30; i++) p.sendMessage("");
 
-            p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
-            p.sendMessage("§6Bienvenue sur §fMoodCraft");
+            // 🔥 MESSAGE LOGIN VISIBLE
             p.sendMessage("");
+            p.sendMessage("§8╔════════════════════════════╗");
+            p.sendMessage("§8║   §6§lMoodCraft §8• §fAuthentification");
+            p.sendMessage("§8╠════════════════════════════╣");
 
             if (AuthManager.isRegistered(p.getUniqueId().toString())) {
-                p.sendMessage("§7Veuillez vous connecter");
-                p.sendMessage("§e➜ §f/login <motdepasse>");
+
+                p.sendMessage("§8║ §e🔐 §fConnexion requise");
+                p.sendMessage("§8║");
+                p.sendMessage("§8║ §7Entre ton mot de passe :");
+                p.sendMessage("§8║ §e➜ §f/login <motdepasse>");
+                p.sendMessage("§8║");
+
             } else {
-                p.sendMessage("§7Création de votre compte");
-                p.sendMessage("§e➜ Entrez un mot de passe dans le chat");
+
+                p.sendMessage("§8║ §a✨ §fCréation de compte");
+                p.sendMessage("§8║");
+                p.sendMessage("§8║ §7Entre ton mot de passe dans le chat");
+                p.sendMessage("§8║ §7pour t'inscrire");
+                p.sendMessage("§8║");
             }
 
+            p.sendMessage("§8║ §7Tes données sont sauvegardées");
+            p.sendMessage("§8╚════════════════════════════╝");
             p.sendMessage("");
-            p.sendMessage("§7Votre progression sera sauvegardée");
-            p.sendMessage("§8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
 
         }, 100L);
 
-        // actionbar propre
         Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
 
             if (isLogged(p) || !p.isOnline()) {
@@ -119,14 +126,11 @@ public class AuthListener implements Listener {
                 return;
             }
 
-            p.sendActionBar("§6MoodCraft §8• §7Connexion requise");
+            p.sendActionBar("§6MoodCraft §8• §eConnexion requise");
 
         }, 100L, 40L);
     }
 
-    // =========================
-    // ✨ AURA PREMIUM
-    // =========================
     private void startAura(Player p) {
 
         Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
@@ -153,9 +157,6 @@ public class AuthListener implements Listener {
         }, 0L, 10L);
     }
 
-    // =========================
-    // 🔒 BLOQUAGES
-    // =========================
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         if (!isLogged(e.getPlayer())) e.setCancelled(true);
@@ -179,7 +180,7 @@ public class AuthListener implements Listener {
 
         if (!msg.startsWith("/login") && !msg.startsWith("/l") && !msg.startsWith("/register")) {
             e.setCancelled(true);
-            p.sendMessage("§cVeuillez vous connecter avec /login");
+            p.sendMessage("§c➜ Connecte-toi avec /login");
         }
     }
 
@@ -200,13 +201,14 @@ public class AuthListener implements Listener {
             if (AuthManager.login(p.getUniqueId().toString(), p.getName(), msg, ip)) {
                 login(p);
             } else {
-                p.sendMessage("§cMot de passe incorrect");
+                p.sendMessage("§8[§c✖§8] §cMot de passe incorrect");
             }
 
         } else {
 
             AuthManager.register(p.getUniqueId().toString(), p.getName(), msg, ip);
-            login(p); // ✔ PAS de double message
+            login(p);
+            p.sendMessage("§8[§a✔§8] §aCompte créé avec succès !");
         }
     }
 
