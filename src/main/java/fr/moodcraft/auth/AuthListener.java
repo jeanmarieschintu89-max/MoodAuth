@@ -28,30 +28,21 @@ public class AuthListener implements Listener {
         p.removePotionEffect(PotionEffectType.BLINDNESS);
         p.removePotionEffect(PotionEffectType.SLOW);
 
-        for (int i = 0; i < 40; i++) p.sendMessage("");
+        for (int i = 0; i < 30; i++) p.sendMessage("");
 
-        p.getWorld().spawnParticle(
-                Particle.END_ROD,
-                p.getLocation(),
-                40,
-                0.4, 1, 0.4,
-                0
-        );
+        p.spawnParticle(Particle.END_ROD, p.getLocation(), 60, 0.5, 1, 0.5, 0);
 
-        p.sendTitle("§a§lMood§e§lCraft", "§aConnexion réussie", 10, 40, 10);
+        p.sendTitle("§a§lMood§e§lCraft", "§aConnexion réussie", 10, 50, 10);
 
         p.sendMessage("");
         p.sendMessage("§8╔════════════════════════════╗");
-        p.sendMessage("§8║   §a§lMood§e§lCraft §8• §6Accès validé");
+        p.sendMessage("§8║   §a§lMood§e§lCraft §8• §aBienvenue");
         p.sendMessage("§8╠════════════════════════════╣");
-        p.sendMessage("§8║ §a✔ §fBienvenue §e" + p.getName());
+        p.sendMessage("§8║ §a✔ §fConnecté en tant que §e" + p.getName());
         p.sendMessage("§8║");
-        p.sendMessage("§8║ §7Ta progression est chargée");
-        p.sendMessage("§8║ §7et prête à évoluer.");
+        p.sendMessage("§8║ §7Ton aventure peut commencer.");
         p.sendMessage("§8║");
-        p.sendMessage("§8║ §7Ville §8• §aMétiers §8• §eBourse");
-        p.sendMessage("§8║");
-        p.sendMessage("§8║ §6➜ §e/menu §7pour commencer");
+        p.sendMessage("§8║ §6➜ §e/menu §7pour ouvrir le menu");
         p.sendMessage("§8╚════════════════════════════╝");
         p.sendMessage("");
 
@@ -63,7 +54,7 @@ public class AuthListener implements Listener {
     }
 
     // =========================
-    // 🎬 JOIN
+    // 🎬 JOIN PREMIUM
     // =========================
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(PlayerJoinEvent e) {
@@ -71,65 +62,78 @@ public class AuthListener implements Listener {
         Player p = e.getPlayer();
         logout(p);
 
-        e.setJoinMessage(null);
+        // 🔥 message join premium
+        e.setJoinMessage("§8[§a+§8] §e" + p.getName() + " §7a rejoint §aMood§eCraft");
 
         p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 9999, 1));
         p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 9999, 10));
 
         startAura(p);
 
-        Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
-            for (int i = 0; i < 60; i++) p.sendMessage("");
-            p.resetTitle();
-        }, 2L);
-
+        // 🔥 écran loading
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
             p.sendTitle("§a§lMood§e§lCraft", "§7Chargement...", 10, 40, 10);
         }, 40L);
 
+        // 🔥 affichage login/register
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
 
-            for (int i = 0; i < 30; i++) p.sendMessage("");
+            for (int i = 0; i < 20; i++) p.sendMessage("");
 
-            p.sendMessage("");
             p.sendMessage("§8╔════════════════════════════╗");
             p.sendMessage("§8║   §a§lMood§e§lCraft §8• §bAuthentification");
             p.sendMessage("§8╠════════════════════════════╣");
 
             if (AuthManager.isRegistered(p.getUniqueId().toString())) {
 
-                p.sendMessage("§8║ §c🔒 §fAccès restreint");
+                p.sendMessage("§8║ §c🔒 §fCompte détecté");
                 p.sendMessage("§8║");
-                p.sendMessage("§8║ §7Veuillez vous connecter");
+                p.sendMessage("§8║ §7Entre ton mot de passe :");
+                p.sendMessage("§8║");
                 p.sendMessage("§8║ §6➜ §e/login <motdepasse>");
                 p.sendMessage("§8║");
 
+                // 🔥 rappel actionbar
+                Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
+
+                    if (isLogged(p) || !p.isOnline()) {
+                        task.cancel();
+                        return;
+                    }
+
+                    p.sendActionBar("§c🔒 Connecte-toi avec §e/login");
+
+                }, 0L, 40L);
+
             } else {
 
-                p.sendMessage("§8║ §a✨ §fCréation de compte");
+                p.sendMessage("§8║ §a✨ §fNouveau joueur");
                 p.sendMessage("§8║");
-                p.sendMessage("§8║ §7Entre un mot de passe dans le chat");
+                p.sendMessage("§8║ §7Crée ton compte :");
                 p.sendMessage("§8║");
+                p.sendMessage("§8║ §6➜ §e/register <motdepasse>");
+                p.sendMessage("§8║");
+
+                Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
+
+                    if (isLogged(p) || !p.isOnline()) {
+                        task.cancel();
+                        return;
+                    }
+
+                    p.sendActionBar("§a✨ Crée ton compte avec §e/register");
+
+                }, 0L, 40L);
             }
 
-            p.sendMessage("§8║ §8Vos données sont sécurisées");
             p.sendMessage("§8╚════════════════════════════╝");
-            p.sendMessage("");
 
-        }, 100L);
-
-        Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
-
-            if (isLogged(p) || !p.isOnline()) {
-                task.cancel();
-                return;
-            }
-
-            p.sendActionBar("§aMood§eCraft §8• §eConnexion requise");
-
-        }, 100L, 40L);
+        }, 80L);
     }
 
+    // =========================
+    // ✨ AURA
+    // =========================
     private void startAura(Player p) {
 
         Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
@@ -171,7 +175,9 @@ public class AuthListener implements Listener {
         }
     }
 
-    // 🔥 FIX IMPORTANT ICI
+    // =========================
+    // 🔒 COMMANDES
+    // =========================
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCommand(PlayerCommandPreprocessEvent e) {
 
@@ -181,11 +187,9 @@ public class AuthListener implements Listener {
 
         String msg = e.getMessage().toLowerCase();
 
-        // ✅ commandes autorisées AVANT login
         if (msg.startsWith("/login")
                 || msg.startsWith("/register")
                 || msg.startsWith("/l")
-                || msg.startsWith("/topgui")
                 || msg.startsWith("/menu")) {
             return;
         }
@@ -194,10 +198,16 @@ public class AuthListener implements Listener {
         p.sendMessage("§c➜ Connecte-toi avec §e/login");
     }
 
+    // =========================
+    // 💬 CHAT AUTH
+    // =========================
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent e) {
 
         Player p = e.getPlayer();
+
+        // 🔥 laisse passer autres systèmes (banque etc)
+        if (p.hasMetadata("bank_input")) return;
 
         if (isLogged(p)) return;
 
