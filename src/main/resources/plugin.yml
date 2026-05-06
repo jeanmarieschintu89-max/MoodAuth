@@ -4,6 +4,7 @@ version: 1.0
 api-version: 1.20
 
 commands:
+
   login:
     description: Se connecter
     usage: /login <motdepasse>
@@ -18,3 +19,8 @@ commands:
     description: Changer son mot de passe
     usage: /changepassword <ancien> <nouveau>
     aliases: [changepass, cp]
+
+  resetcompte:
+    description: Réinitialiser un compte auth
+    usage: /resetcompte <joueur>
+    permission: moodauth.admin
