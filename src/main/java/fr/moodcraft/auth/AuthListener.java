@@ -20,6 +20,12 @@ public class AuthListener implements Listener {
         return logged.contains(p.getUniqueId());
     }
 
+    private static void clearChat(Player p) {
+        for (int i = 0; i < 80; i++) {
+            p.sendMessage("");
+        }
+    }
+
     public static void login(Player p) {
 
         if (isLogged(p)) return;
@@ -34,7 +40,7 @@ public class AuthListener implements Listener {
             p.removePotionEffect(PotionEffectType.BLINDNESS);
             p.removePotionEffect(PotionEffectType.SLOW);
 
-            for (int i = 0; i < 30; i++) p.sendMessage("");
+            clearChat(p);
 
             p.spawnParticle(
                     Particle.END_ROD,
@@ -48,17 +54,19 @@ public class AuthListener implements Listener {
 
             p.sendTitle(
                     "§a§lMood§e§lCraft",
-                    "§aConnexion réussie",
+                    "§aAccès confirmé",
                     10,
                     50,
                     10
             );
 
-            p.sendMessage("");
             p.sendMessage("§8----- §aMood§eCraft §8-----");
-            p.sendMessage("§a✔ §fConnecté en tant que §e" + p.getName());
-            p.sendMessage("§7Ton aventure peut commencer.");
-            p.sendMessage("§6➜ §e/menu §7pour ouvrir le menu");
+            p.sendMessage("§a✔ §fSession ouverte : §e" + p.getName());
+            p.sendMessage("§7Bienvenue sur le serveur.");
+            p.sendMessage("");
+            p.sendMessage("§6➜ §e/menu §7ouvrir le menu principal");
+            p.sendMessage("§8----- §7Sécurité §8-----");
+            p.sendMessage("§7Changer le mot de passe : §e/changepass");
             p.sendMessage("");
 
             p.playSound(
@@ -97,10 +105,11 @@ public class AuthListener implements Listener {
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
 
             if (!p.isOnline()) return;
+            if (isLogged(p)) return;
 
             p.sendTitle(
                     "§a§lMood§e§lCraft",
-                    "§7Chargement...",
+                    "§7Vérification de session...",
                     10,
                     40,
                     10
@@ -111,15 +120,17 @@ public class AuthListener implements Listener {
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
 
             if (!p.isOnline()) return;
+            if (isLogged(p)) return;
 
-            for (int i = 0; i < 20; i++) p.sendMessage("");
+            clearChat(p);
 
-            p.sendMessage("§8----- §6Authentification §8-----");
+            p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
 
             if (AuthManager.isRegistered(p.getUniqueId().toString())) {
 
                 p.sendMessage("§c🔒 §fCompte détecté");
-                p.sendMessage("§7Entre ton mot de passe dans le chat.");
+                p.sendMessage("§7Ta session est verrouillée.");
+                p.sendMessage("");
                 p.sendMessage("§6➜ §e/login <motdepasse>");
                 p.sendMessage("");
 
@@ -130,14 +141,15 @@ public class AuthListener implements Listener {
                         return;
                     }
 
-                    p.sendActionBar("§c🔒 Connecte-toi avec §e/login");
+                    p.sendActionBar("§c🔒 Session verrouillée §8• §e/login <motdepasse>");
 
                 }, 0L, 40L);
 
             } else {
 
-                p.sendMessage("§a✨ §fNouveau joueur");
-                p.sendMessage("§7Crée ton compte dans le chat.");
+                p.sendMessage("§a✨ §fPremière connexion");
+                p.sendMessage("§7Crée ton accès personnel.");
+                p.sendMessage("");
                 p.sendMessage("§6➜ §e/register <motdepasse>");
                 p.sendMessage("");
 
@@ -148,7 +160,7 @@ public class AuthListener implements Listener {
                         return;
                     }
 
-                    p.sendActionBar("§a✨ Crée ton compte avec §e/register");
+                    p.sendActionBar("§a✨ Nouveau compte §8• §e/register <motdepasse>");
 
                 }, 0L, 40L);
             }
@@ -215,7 +227,16 @@ public class AuthListener implements Listener {
         }
 
         e.setCancelled(true);
-        p.sendMessage("§c➜ Connecte-toi avec §e/login");
+
+        if (AuthManager.isRegistered(p.getUniqueId().toString())) {
+            p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+            p.sendMessage("§c🔒 §fConnecte-toi d'abord.");
+            p.sendMessage("§6➜ §e/login <motdepasse>");
+        } else {
+            p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+            p.sendMessage("§a✨ §fCrée ton compte d'abord.");
+            p.sendMessage("§6➜ §e/register <motdepasse>");
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -232,14 +253,14 @@ public class AuthListener implements Listener {
 
         Bukkit.getScheduler().runTaskAsynchronously(Main.get(), () -> {
 
+            if (!p.isOnline()) return;
+
             String ip = p.getAddress().getAddress().getHostAddress();
             String uuid = p.getUniqueId().toString();
 
-            boolean success;
-
             if (AuthManager.isRegistered(uuid)) {
 
-                success = AuthManager.login(
+                boolean success = AuthManager.login(
                         uuid,
                         p.getName(),
                         msg,
@@ -248,27 +269,29 @@ public class AuthListener implements Listener {
 
                 if (success) {
                     login(p);
-                } else {
-
-                    Bukkit.getScheduler().runTask(Main.get(), () -> {
-
-                        if (!p.isOnline()) return;
-
-                        p.sendMessage("§8[§c✖§8] §cMot de passe incorrect");
-                    });
+                    return;
                 }
 
-            } else {
+                Bukkit.getScheduler().runTask(Main.get(), () -> {
 
-                AuthManager.register(
-                        uuid,
-                        p.getName(),
-                        msg,
-                        ip
-                );
+                    if (!p.isOnline()) return;
+                    if (isLogged(p)) return;
 
-                login(p);
+                    p.sendMessage("§8[§c✖§8] §cMot de passe incorrect.");
+                    p.sendMessage("§6➜ §e/login <motdepasse>");
+                });
+
+                return;
             }
+
+            AuthManager.register(
+                    uuid,
+                    p.getName(),
+                    msg,
+                    ip
+            );
+
+            login(p);
         });
     }
 
