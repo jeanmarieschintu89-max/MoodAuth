@@ -1,7 +1,5 @@
 package fr.moodcraft.auth;
 
-import fr.moodcraft.auth.command.ResetAccountCommand;
-
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
@@ -17,15 +15,7 @@ public class Main extends JavaPlugin {
 
         instance = this;
 
-        //
-        // 🔐 INIT AUTH
-        //
-
         AuthManager.init();
-
-        //
-        // 📜 COMMANDES
-        //
 
         getCommand("login")
                 .setExecutor(new LoginCommand());
@@ -33,19 +23,11 @@ public class Main extends JavaPlugin {
         getCommand("register")
                 .setExecutor(new RegisterCommand());
 
-        getCommand("changepassword")
+        getCommand("changepass")
                 .setExecutor(new ChangePasswordCommand());
-
-        //
-        // 🔥 RESET COMPTE
-        //
 
         getCommand("resetcompte")
                 .setExecutor(new ResetAccountCommand());
-
-        //
-        // 🎧 LISTENERS
-        //
 
         getServer()
                 .getPluginManager()
@@ -54,15 +36,16 @@ public class Main extends JavaPlugin {
                         this
                 );
 
-        //
-        // 🚀 LOG
-        //
-
         getLogger().info("=================================");
         getLogger().info("✅ MoodAuth chargé");
         getLogger().info("🔐 Auth système: OK");
         getLogger().info("🛡 Protection session: OK");
         getLogger().info("⚡ Reset compte: OK");
         getLogger().info("=================================");
+    }
+
+    @Override
+    public void onDisable() {
+        getLogger().info("🛑 MoodAuth arrêté.");
     }
 }
