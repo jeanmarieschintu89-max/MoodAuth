@@ -1,3 +1,4 @@
+
 package fr.moodcraft.auth;
 
 import org.bukkit.*;
