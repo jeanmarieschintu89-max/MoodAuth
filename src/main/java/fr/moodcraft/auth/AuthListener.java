@@ -22,15 +22,22 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AuthListener
         implements Listener {
 
     private static final Set<UUID> logged =
-            new HashSet<>();
+            ConcurrentHashMap.newKeySet();
+
+    private static final Map<UUID, Integer> failedAttempts =
+            new ConcurrentHashMap<>();
+
+    private static final int MAX_ATTEMPTS =
+            3;
 
     public static boolean isLogged(
             Player p
@@ -72,6 +79,10 @@ public class AuthListener
                             }
 
                             logged.add(
+                                    p.getUniqueId()
+                            );
+
+                            failedAttempts.remove(
                                     p.getUniqueId()
                             );
 
@@ -130,6 +141,10 @@ public class AuthListener
     ) {
 
         logged.remove(
+                p.getUniqueId()
+        );
+
+        failedAttempts.remove(
                 p.getUniqueId()
         );
     }
@@ -477,9 +492,20 @@ public class AuthListener
 
                                 if (success) {
 
+                                    failedAttempts.remove(
+                                            p.getUniqueId()
+                                    );
+
                                     login(p);
                                     return;
                                 }
+
+                                int attempts =
+                                        failedAttempts.merge(
+                                                p.getUniqueId(),
+                                                1,
+                                                Integer::sum
+                                        );
 
                                 Bukkit.getScheduler()
                                         .runTask(
@@ -496,8 +522,22 @@ public class AuthListener
 
                                                     p.sendMessage("");
                                                     p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
-                                                    p.sendMessage("§cMot de passe incorrect.");
-                                                    p.sendMessage("§7Commande : §e/login <motdepasse>");
+
+                                                    if (attempts >= MAX_ATTEMPTS) {
+
+                                                        p.sendMessage("§cTrop de tentatives incorrectes.");
+                                                        p.sendMessage("§7Veuillez contacter un membre du staff");
+                                                        p.sendMessage("§7via un §eticket Discord§7.");
+                                                        p.sendMessage("");
+                                                        p.sendMessage("§8Le staff pourra vérifier votre compte.");
+
+                                                    } else {
+
+                                                        p.sendMessage("§cMot de passe incorrect.");
+                                                        p.sendMessage("§7Commande : §e/login <motdepasse>");
+                                                        p.sendMessage("§8Tentative : §e" + attempts + "§8/§e" + MAX_ATTEMPTS);
+                                                    }
+
                                                     p.sendMessage("");
 
                                                     p.playSound(
@@ -517,6 +557,10 @@ public class AuthListener
                                     p.getName(),
                                     msg,
                                     ip
+                            );
+
+                            failedAttempts.remove(
+                                    p.getUniqueId()
                             );
 
                             login(p);
