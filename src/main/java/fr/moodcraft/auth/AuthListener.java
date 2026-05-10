@@ -23,31 +23,51 @@ public class AuthListener implements Listener {
     public static void login(Player p) {
 
         if (isLogged(p)) return;
-        logged.add(p.getUniqueId());
 
-        p.removePotionEffect(PotionEffectType.BLINDNESS);
-        p.removePotionEffect(PotionEffectType.SLOW);
+        Bukkit.getScheduler().runTask(Main.get(), () -> {
 
-        for (int i = 0; i < 30; i++) p.sendMessage("");
+            if (!p.isOnline()) return;
+            if (isLogged(p)) return;
 
-        p.spawnParticle(Particle.END_ROD, p.getLocation(), 60, 0.5, 1, 0.5, 0);
+            logged.add(p.getUniqueId());
 
-        p.sendTitle("§a§lMood§e§lCraft", "§aConnexion réussie", 10, 50, 10);
+            p.removePotionEffect(PotionEffectType.BLINDNESS);
+            p.removePotionEffect(PotionEffectType.SLOW);
 
-        // ✅ ON GARDE SEULEMENT LE TABLEAU (propre)
-        p.sendMessage("");
-        p.sendMessage("§8╔════════════════════════════╗");
-        p.sendMessage("§8║   §a§lMood§e§lCraft §8• §aBienvenue");
-        p.sendMessage("§8╠════════════════════════════╣");
-        p.sendMessage("§8║ §a✔ §fConnecté en tant que §e" + p.getName());
-        p.sendMessage("§8║");
-        p.sendMessage("§8║ §7Ton aventure peut commencer.");
-        p.sendMessage("§8║");
-        p.sendMessage("§8║ §6➜ §e/menu §7pour ouvrir le menu");
-        p.sendMessage("§8╚════════════════════════════╝");
-        p.sendMessage("");
+            for (int i = 0; i < 30; i++) p.sendMessage("");
 
-        p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1f, 1f);
+            p.spawnParticle(
+                    Particle.END_ROD,
+                    p.getLocation(),
+                    60,
+                    0.5,
+                    1,
+                    0.5,
+                    0
+            );
+
+            p.sendTitle(
+                    "§a§lMood§e§lCraft",
+                    "§aConnexion réussie",
+                    10,
+                    50,
+                    10
+            );
+
+            p.sendMessage("");
+            p.sendMessage("§8----- §aMood§eCraft §8-----");
+            p.sendMessage("§a✔ §fConnecté en tant que §e" + p.getName());
+            p.sendMessage("§7Ton aventure peut commencer.");
+            p.sendMessage("§6➜ §e/menu §7pour ouvrir le menu");
+            p.sendMessage("");
+
+            p.playSound(
+                    p.getLocation(),
+                    Sound.UI_TOAST_CHALLENGE_COMPLETE,
+                    1f,
+                    1f
+            );
+        });
     }
 
     public static void logout(Player p) {
@@ -60,33 +80,48 @@ public class AuthListener implements Listener {
         Player p = e.getPlayer();
         logout(p);
 
-        e.setJoinMessage("§8[§a+§8] §e" + p.getName() + " §7a rejoint §aMood§eCraft");
+        e.setJoinMessage(
+                "§8[§a+§8] §e" + p.getName() + " §7a rejoint §aMood§eCraft"
+        );
 
-        p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 9999, 1));
-        p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 9999, 10));
+        p.addPotionEffect(
+                new PotionEffect(PotionEffectType.BLINDNESS, 9999, 1)
+        );
+
+        p.addPotionEffect(
+                new PotionEffect(PotionEffectType.SLOW, 9999, 10)
+        );
 
         startAura(p);
 
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
-            p.sendTitle("§a§lMood§e§lCraft", "§7Chargement...", 10, 40, 10);
+
+            if (!p.isOnline()) return;
+
+            p.sendTitle(
+                    "§a§lMood§e§lCraft",
+                    "§7Chargement...",
+                    10,
+                    40,
+                    10
+            );
+
         }, 40L);
 
         Bukkit.getScheduler().runTaskLater(Main.get(), () -> {
 
+            if (!p.isOnline()) return;
+
             for (int i = 0; i < 20; i++) p.sendMessage("");
 
-            p.sendMessage("§8╔════════════════════════════╗");
-            p.sendMessage("§8║   §a§lMood§e§lCraft §8• §bAuthentification");
-            p.sendMessage("§8╠════════════════════════════╣");
+            p.sendMessage("§8----- §6Authentification §8-----");
 
             if (AuthManager.isRegistered(p.getUniqueId().toString())) {
 
-                p.sendMessage("§8║ §c🔒 §fCompte détecté");
-                p.sendMessage("§8║");
-                p.sendMessage("§8║ §7Entre ton mot de passe :");
-                p.sendMessage("§8║");
-                p.sendMessage("§8║ §6➜ §e/login <motdepasse>");
-                p.sendMessage("§8║");
+                p.sendMessage("§c🔒 §fCompte détecté");
+                p.sendMessage("§7Entre ton mot de passe dans le chat.");
+                p.sendMessage("§6➜ §e/login <motdepasse>");
+                p.sendMessage("");
 
                 Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
 
@@ -101,12 +136,10 @@ public class AuthListener implements Listener {
 
             } else {
 
-                p.sendMessage("§8║ §a✨ §fNouveau joueur");
-                p.sendMessage("§8║");
-                p.sendMessage("§8║ §7Crée ton compte :");
-                p.sendMessage("§8║");
-                p.sendMessage("§8║ §6➜ §e/register <motdepasse>");
-                p.sendMessage("§8║");
+                p.sendMessage("§a✨ §fNouveau joueur");
+                p.sendMessage("§7Crée ton compte dans le chat.");
+                p.sendMessage("§6➜ §e/register <motdepasse>");
+                p.sendMessage("");
 
                 Bukkit.getScheduler().runTaskTimer(Main.get(), task -> {
 
@@ -119,8 +152,6 @@ public class AuthListener implements Listener {
 
                 }, 0L, 40L);
             }
-
-            p.sendMessage("§8╚════════════════════════════╝");
 
         }, 80L);
     }
@@ -137,6 +168,7 @@ public class AuthListener implements Listener {
             Location loc = p.getLocation().clone().add(0, 1, 0);
 
             for (int i = 0; i < 10; i++) {
+
                 double angle = 2 * Math.PI * i / 10;
                 double x = Math.cos(angle);
                 double z = Math.sin(angle);
@@ -153,11 +185,15 @@ public class AuthListener implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
-        if (!isLogged(e.getPlayer())) e.setCancelled(true);
+
+        if (!isLogged(e.getPlayer())) {
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onDamage(EntityDamageEvent e) {
+
         if (e.getEntity() instanceof Player p && !isLogged(p)) {
             e.setCancelled(true);
         }
@@ -174,8 +210,7 @@ public class AuthListener implements Listener {
 
         if (msg.startsWith("/login")
                 || msg.startsWith("/register")
-                || msg.startsWith("/l")
-                || msg.startsWith("/menu")) {
+                || msg.startsWith("/l")) {
             return;
         }
 
@@ -188,29 +223,53 @@ public class AuthListener implements Listener {
 
         Player p = e.getPlayer();
 
-        // 🔥 laisse passer tes systèmes d'input
         if (p.hasMetadata("input_active")) return;
-
         if (isLogged(p)) return;
 
         e.setCancelled(true);
 
         String msg = e.getMessage();
-        String ip = p.getAddress().getAddress().getHostAddress();
 
-        if (AuthManager.isRegistered(p.getUniqueId().toString())) {
+        Bukkit.getScheduler().runTaskAsynchronously(Main.get(), () -> {
 
-            if (AuthManager.login(p.getUniqueId().toString(), p.getName(), msg, ip)) {
-                login(p);
+            String ip = p.getAddress().getAddress().getHostAddress();
+            String uuid = p.getUniqueId().toString();
+
+            boolean success;
+
+            if (AuthManager.isRegistered(uuid)) {
+
+                success = AuthManager.login(
+                        uuid,
+                        p.getName(),
+                        msg,
+                        ip
+                );
+
+                if (success) {
+                    login(p);
+                } else {
+
+                    Bukkit.getScheduler().runTask(Main.get(), () -> {
+
+                        if (!p.isOnline()) return;
+
+                        p.sendMessage("§8[§c✖§8] §cMot de passe incorrect");
+                    });
+                }
+
             } else {
-                p.sendMessage("§8[§c✖§8] §cMot de passe incorrect");
+
+                AuthManager.register(
+                        uuid,
+                        p.getName(),
+                        msg,
+                        ip
+                );
+
+                login(p);
             }
-
-        } else {
-
-            AuthManager.register(p.getUniqueId().toString(), p.getName(), msg, ip);
-            login(p); // ✅ déjà le message dans login → pas de doublon
-        }
+        });
     }
 
     @EventHandler
