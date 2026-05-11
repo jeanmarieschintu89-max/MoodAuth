@@ -100,7 +100,8 @@ public class AuthListener
     ) {
 
         p.sendMessage("");
-        p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+        p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
+        p.sendMessage("");
 
         if (attempts >= MAX_ATTEMPTS) {
 
@@ -109,8 +110,11 @@ public class AuthListener
         } else {
 
             p.sendMessage("§cMot de passe incorrect.");
-            p.sendMessage("§7Commande : §e/login <motdepasse>");
             p.sendMessage("§8Tentative : §e" + attempts + "§8/§e" + MAX_ATTEMPTS);
+            p.sendMessage("");
+            p.sendMessage("§6➜ §e/login <motdepasse> §7réessayer");
+            p.sendMessage("§6➜ §e/discord §7support et ticket");
+            p.sendMessage("§6➜ §e/site §7site officiel");
         }
 
         p.sendMessage("");
@@ -128,7 +132,8 @@ public class AuthListener
     ) {
 
         p.sendMessage("");
-        p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+        p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
+        p.sendMessage("");
         sendStaffMessageContent(p);
         p.sendMessage("");
 
@@ -147,6 +152,9 @@ public class AuthListener
         p.sendMessage("§cTrop de tentatives incorrectes.");
         p.sendMessage("§7Veuillez contacter un membre du staff");
         p.sendMessage("§7via un §eticket Discord§7.");
+        p.sendMessage("");
+        p.sendMessage("§6➜ §e/discord §7support et ticket");
+        p.sendMessage("§6➜ §e/site §7site officiel");
         p.sendMessage("");
         p.sendMessage("§8Le staff pourra vérifier votre compte.");
     }
@@ -213,7 +221,8 @@ public class AuthListener
                             );
 
                             p.sendMessage("");
-                            p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+                            p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
+                            p.sendMessage("");
                             p.sendMessage("§7Bienvenue, §e" + p.getName() + "§7.");
                             p.sendMessage("");
                             p.sendMessage("§a✔ §fConnexion confirmée.");
@@ -348,10 +357,13 @@ public class AuthListener
     ) {
 
         p.sendMessage("");
-        p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+        p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
+        p.sendMessage("");
         p.sendMessage("§fVeuillez vous connecter.");
         p.sendMessage("");
-        p.sendMessage("§7Commande : §e/login <motdepasse>");
+        p.sendMessage("§6➜ §e/login <motdepasse> §7connexion au compte");
+        p.sendMessage("§6➜ §e/discord §7support et communauté");
+        p.sendMessage("§6➜ §e/site §7site officiel");
         p.sendMessage("");
         p.sendMessage("§8Votre compte protège votre progression sur MoodCraft.");
         p.sendMessage("");
@@ -362,10 +374,13 @@ public class AuthListener
     ) {
 
         p.sendMessage("");
-        p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+        p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
+        p.sendMessage("");
         p.sendMessage("§fVeuillez créer votre compte.");
         p.sendMessage("");
-        p.sendMessage("§7Commande : §e/register <motdepasse>");
+        p.sendMessage("§6➜ §e/register <motdepasse> §7création du compte");
+        p.sendMessage("§6➜ §e/discord §7support et communauté");
+        p.sendMessage("§6➜ §e/site §7site officiel");
         p.sendMessage("");
         p.sendMessage("§8Ce compte protège votre progression sur MoodCraft.");
         p.sendMessage("");
@@ -389,14 +404,14 @@ public class AuthListener
                             if (isBlocked(p)) {
 
                                 p.sendActionBar(
-                                        "§6Sécurité §8• §cTrop de tentatives §8• §eTicket Discord"
+                                        "§6Sécurité §8• §cTrop de tentatives §8• §e/discord"
                                 );
 
                                 return;
                             }
 
                             p.sendActionBar(
-                                    "§6Sécurité §8• §fVeuillez vous connecter §8• §e/login <motdepasse>"
+                                    "§6Sécurité §8• §fConnexion requise §8• §e/login <motdepasse>"
                             );
 
                         },
@@ -421,7 +436,7 @@ public class AuthListener
                             }
 
                             p.sendActionBar(
-                                    "§6Sécurité §8• §fVeuillez créer votre compte §8• §e/register <motdepasse>"
+                                    "§6Sécurité §8• §fCréation requise §8• §e/register <motdepasse>"
                             );
 
                         },
@@ -567,19 +582,11 @@ public class AuthListener
                 return;
             }
 
-            p.sendMessage("");
-            p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
-            p.sendMessage("§fVeuillez vous connecter.");
-            p.sendMessage("§7Commande : §e/login <motdepasse>");
-            p.sendMessage("");
+            sendLoginMessage(p);
 
         } else {
 
-            p.sendMessage("");
-            p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
-            p.sendMessage("§fVeuillez créer votre compte.");
-            p.sendMessage("§7Commande : §e/register <motdepasse>");
-            p.sendMessage("");
+            sendRegisterMessage(p);
         }
     }
 
@@ -592,6 +599,8 @@ public class AuthListener
 
         return command.equals("/login")
                 || command.equals("/register")
+                || command.equals("/discord")
+                || command.equals("/site")
                 || command.equals("/l");
     }
 
@@ -698,27 +707,4 @@ public class AuthListener
                                         );
 
                                 return;
-                            }
-
-                            AuthManager.register(
-                                    uuid,
-                                    name,
-                                    password,
-                                    ip
-                            );
-
-                            login(p);
-                        }
-                );
-    }
-
-    @EventHandler
-    public void onQuit(
-            PlayerQuitEvent e
-    ) {
-
-        logout(
-                e.getPlayer()
-        );
-    }
-}
+              
