@@ -218,12 +218,13 @@ public class AuthListener
 
                             p.sendMessage("");
                             p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
-                            p.sendMessage("§a✔ §fConnexion confirmée.");
                             p.sendMessage("§7Bienvenue, §e" + p.getName() + "§7.");
                             p.sendMessage("");
+                            p.sendMessage("§a✔ §fConnexion confirmée.");
                             p.sendMessage("§6➜ §e/menu §7ouvrir le menu principal");
-                            p.sendMessage("§8----- §7Compte §8-----");
-                            p.sendMessage("§7Votre compte est protégé par la sécurité MoodCraft.");
+                            p.sendMessage("§6➜ §e/menuville §7ouvrir le menu ville");
+                            p.sendMessage("");
+                            p.sendMessage("§8Votre compte protège votre progression sur MoodCraft.");
                             p.sendMessage("");
 
                             p.playSound(
