@@ -36,6 +36,9 @@ public class AuthListener
     private static final Map<UUID, Integer> failedAttempts =
             new ConcurrentHashMap<>();
 
+    private static final Set<UUID> blocked =
+            ConcurrentHashMap.newKeySet();
+
     private static final int MAX_ATTEMPTS =
             3;
 
@@ -46,6 +49,106 @@ public class AuthListener
         return logged.contains(
                 p.getUniqueId()
         );
+    }
+
+    public static boolean isBlocked(
+            Player p
+    ) {
+
+        return blocked.contains(
+                p.getUniqueId()
+        );
+    }
+
+    public static int registerFailedAttempt(
+            Player p
+    ) {
+
+        int attempts =
+                failedAttempts.merge(
+                        p.getUniqueId(),
+                        1,
+                        Integer::sum
+                );
+
+        if (attempts >= MAX_ATTEMPTS) {
+
+            blocked.add(
+                    p.getUniqueId()
+            );
+        }
+
+        return attempts;
+    }
+
+    public static void resetFailedAttempts(
+            Player p
+    ) {
+
+        failedAttempts.remove(
+                p.getUniqueId()
+        );
+
+        blocked.remove(
+                p.getUniqueId()
+        );
+    }
+
+    public static void sendFailedAttemptMessage(
+            Player p,
+            int attempts
+    ) {
+
+        p.sendMessage("");
+        p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+
+        if (attempts >= MAX_ATTEMPTS) {
+
+            sendStaffMessageContent(p);
+
+        } else {
+
+            p.sendMessage("§cMot de passe incorrect.");
+            p.sendMessage("§7Commande : §e/login <motdepasse>");
+            p.sendMessage("§8Tentative : §e" + attempts + "§8/§e" + MAX_ATTEMPTS);
+        }
+
+        p.sendMessage("");
+
+        p.playSound(
+                p.getLocation(),
+                Sound.BLOCK_NOTE_BLOCK_BASS,
+                0.8f,
+                0.8f
+        );
+    }
+
+    public static void sendBlockedMessage(
+            Player p
+    ) {
+
+        p.sendMessage("");
+        p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+        sendStaffMessageContent(p);
+        p.sendMessage("");
+
+        p.playSound(
+                p.getLocation(),
+                Sound.BLOCK_NOTE_BLOCK_BASS,
+                0.8f,
+                0.8f
+        );
+    }
+
+    private static void sendStaffMessageContent(
+            Player p
+    ) {
+
+        p.sendMessage("§cTrop de tentatives incorrectes.");
+        p.sendMessage("§7Veuillez contacter un membre du staff");
+        p.sendMessage("§7via un §eticket Discord§7.");
+        p.sendMessage("");
+        p.sendMessage("§8Le staff pourra vérifier votre compte.");
     }
 
     private static void clearChat(
@@ -82,9 +185,7 @@ public class AuthListener
                                     p.getUniqueId()
                             );
 
-                            failedAttempts.remove(
-                                    p.getUniqueId()
-                            );
+                            resetFailedAttempts(p);
 
                             p.removePotionEffect(
                                     PotionEffectType.BLINDNESS
@@ -121,9 +222,9 @@ public class AuthListener
                             p.sendMessage("§7Bienvenue, §e" + p.getName() + "§7.");
                             p.sendMessage("");
                             p.sendMessage("§6➜ §e/menu §7ouvrir le menu principal");
-                            p.sendMessage("§6➜ §e/menuville §7ouvrir le menu ville");
+                            p.sendMessage("§6➜ §e/changepass §7changer le mot de passe");
                             p.sendMessage("§8----- §7Compte §8-----");
-                            p.sendMessage("§7Changer le mot de passe : §e/changepass");
+                            p.sendMessage("§7Votre compte est protégé par la sécurité MoodCraft.");
                             p.sendMessage("");
 
                             p.playSound(
@@ -144,9 +245,7 @@ public class AuthListener
                 p.getUniqueId()
         );
 
-        failedAttempts.remove(
-                p.getUniqueId()
-        );
+        resetFailedAttempts(p);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -283,6 +382,15 @@ public class AuthListener
                                 return;
                             }
 
+                            if (isBlocked(p)) {
+
+                                p.sendActionBar(
+                                        "§6Sécurité §8• §cTrop de tentatives §8• §eTicket Discord"
+                                );
+
+                                return;
+                            }
+
                             p.sendActionBar(
                                     "§6Sécurité §8• §fVeuillez vous connecter §8• §e/login <motdepasse>"
                             );
@@ -373,12 +481,40 @@ public class AuthListener
             PlayerMoveEvent e
     ) {
 
-        if (!isLogged(
-                e.getPlayer()
-        )) {
+        Player p =
+                e.getPlayer();
 
-            e.setCancelled(true);
+        if (isLogged(p)) {
+            return;
         }
+
+        Location from =
+                e.getFrom();
+
+        Location to =
+                e.getTo();
+
+        if (to == null) {
+            return;
+        }
+
+        if (from.getX() == to.getX()
+                && from.getY() == to.getY()
+                && from.getZ() == to.getZ()) {
+            return;
+        }
+
+        Location fixed =
+                new Location(
+                        from.getWorld(),
+                        from.getX(),
+                        from.getY(),
+                        from.getZ(),
+                        to.getYaw(),
+                        to.getPitch()
+                );
+
+        e.setTo(fixed);
     }
 
     @EventHandler
@@ -405,13 +541,12 @@ public class AuthListener
             return;
         }
 
-        String msg =
+        String message =
                 e.getMessage()
+                        .trim()
                         .toLowerCase();
 
-        if (msg.startsWith("/login")
-                || msg.startsWith("/register")
-                || msg.startsWith("/l")) {
+        if (isAllowedAuthCommand(message)) {
             return;
         }
 
@@ -421,6 +556,12 @@ public class AuthListener
                 p.getUniqueId()
                         .toString()
         )) {
+
+            if (isBlocked(p)) {
+
+                sendBlockedMessage(p);
+                return;
+            }
 
             p.sendMessage("");
             p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
@@ -436,6 +577,18 @@ public class AuthListener
             p.sendMessage("§7Commande : §e/register <motdepasse>");
             p.sendMessage("");
         }
+    }
+
+    private boolean isAllowedAuthCommand(
+            String message
+    ) {
+
+        String command =
+                message.split(" ")[0];
+
+        return command.equals("/login")
+                || command.equals("/register")
+                || command.equals("/l");
     }
 
     @EventHandler(
@@ -459,8 +612,20 @@ public class AuthListener
 
         e.setCancelled(true);
 
-        String msg =
+        String password =
                 e.getMessage();
+
+        String uuid =
+                p.getUniqueId()
+                        .toString();
+
+        String name =
+                p.getName();
+
+        String ip =
+                p.getAddress()
+                        .getAddress()
+                        .getHostAddress();
 
         Bukkit.getScheduler()
                 .runTaskAsynchronously(
@@ -471,41 +636,42 @@ public class AuthListener
                                 return;
                             }
 
-                            String ip =
-                                    p.getAddress()
-                                            .getAddress()
-                                            .getHostAddress();
-
-                            String uuid =
-                                    p.getUniqueId()
-                                            .toString();
-
                             if (AuthManager.isRegistered(uuid)) {
+
+                                if (isBlocked(p)) {
+
+                                    Bukkit.getScheduler()
+                                            .runTask(
+                                                    Main.get(),
+                                                    () -> {
+
+                                                        if (!p.isOnline()) {
+                                                            return;
+                                                        }
+
+                                                        sendBlockedMessage(p);
+                                                    }
+                                            );
+
+                                    return;
+                                }
 
                                 boolean success =
                                         AuthManager.login(
                                                 uuid,
-                                                p.getName(),
-                                                msg,
+                                                name,
+                                                password,
                                                 ip
                                         );
 
                                 if (success) {
-
-                                    failedAttempts.remove(
-                                            p.getUniqueId()
-                                    );
 
                                     login(p);
                                     return;
                                 }
 
                                 int attempts =
-                                        failedAttempts.merge(
-                                                p.getUniqueId(),
-                                                1,
-                                                Integer::sum
-                                        );
+                                        registerFailedAttempt(p);
 
                                 Bukkit.getScheduler()
                                         .runTask(
@@ -520,31 +686,9 @@ public class AuthListener
                                                         return;
                                                     }
 
-                                                    p.sendMessage("");
-                                                    p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
-
-                                                    if (attempts >= MAX_ATTEMPTS) {
-
-                                                        p.sendMessage("§cTrop de tentatives incorrectes.");
-                                                        p.sendMessage("§7Veuillez contacter un membre du staff");
-                                                        p.sendMessage("§7via un §eticket Discord§7.");
-                                                        p.sendMessage("");
-                                                        p.sendMessage("§8Le staff pourra vérifier votre compte.");
-
-                                                    } else {
-
-                                                        p.sendMessage("§cMot de passe incorrect.");
-                                                        p.sendMessage("§7Commande : §e/login <motdepasse>");
-                                                        p.sendMessage("§8Tentative : §e" + attempts + "§8/§e" + MAX_ATTEMPTS);
-                                                    }
-
-                                                    p.sendMessage("");
-
-                                                    p.playSound(
-                                                            p.getLocation(),
-                                                            Sound.BLOCK_NOTE_BLOCK_BASS,
-                                                            0.8f,
-                                                            0.8f
+                                                    sendFailedAttemptMessage(
+                                                            p,
+                                                            attempts
                                                     );
                                                 }
                                         );
@@ -554,13 +698,9 @@ public class AuthListener
 
                             AuthManager.register(
                                     uuid,
-                                    p.getName(),
-                                    msg,
+                                    name,
+                                    password,
                                     ip
-                            );
-
-                            failedAttempts.remove(
-                                    p.getUniqueId()
                             );
 
                             login(p);
