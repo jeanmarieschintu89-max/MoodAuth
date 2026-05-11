@@ -712,4 +712,13 @@ public class AuthListener
                 );
     }
 
-    @
+    @EventHandler
+    public void onQuit(
+            PlayerQuitEvent e
+    ) {
+
+        logout(
+                e.getPlayer()
+        );
+    }
+}
