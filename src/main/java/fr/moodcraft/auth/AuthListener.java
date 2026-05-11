@@ -707,4 +707,27 @@ public class AuthListener
                                         );
 
                                 return;
-              
+                            }
+
+                            AuthManager.register(
+                                    uuid,
+                                    name,
+                                    password,
+                                    ip
+                            );
+
+                            login(p);
+                        }
+                );
+    }
+
+    @EventHandler
+    public void onQuit(
+            PlayerQuitEvent e
+    ) {
+
+        logout(
+                e.getPlayer()
+        );
+    }
+}
