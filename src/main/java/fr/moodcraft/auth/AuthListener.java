@@ -222,7 +222,6 @@ public class AuthListener
                             p.sendMessage("§7Bienvenue, §e" + p.getName() + "§7.");
                             p.sendMessage("");
                             p.sendMessage("§6➜ §e/menu §7ouvrir le menu principal");
-                            p.sendMessage("§6➜ §e/changepass §7changer le mot de passe");
                             p.sendMessage("§8----- §7Compte §8-----");
                             p.sendMessage("§7Votre compte est protégé par la sécurité MoodCraft.");
                             p.sendMessage("");
