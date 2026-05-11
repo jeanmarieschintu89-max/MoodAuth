@@ -208,12 +208,8 @@ public class AuthListener
                                     0
                             );
 
-                            p.sendTitle(
-                                    "§a§lMood§e§lCraft",
-                                    "§fConnexion confirmée",
-                                    10,
-                                    45,
-                                    10
+                            p.sendActionBar(
+                                    "§a✔ §fConnexion confirmée §8• §eBienvenue sur MoodCraft"
                             );
 
                             p.sendMessage("");
@@ -293,13 +289,21 @@ public class AuthListener
                                 return;
                             }
 
-                            p.sendTitle(
-                                    "§a§lMood§e§lCraft",
-                                    "§fConnexion requise",
-                                    10,
-                                    45,
-                                    10
-                            );
+                            if (AuthManager.isRegistered(
+                                    p.getUniqueId()
+                                            .toString()
+                            )) {
+
+                                p.sendActionBar(
+                                        "§6Sécurité §8• §fConnexion requise §8• §e/login <motdepasse>"
+                                );
+
+                            } else {
+
+                                p.sendActionBar(
+                                        "§6Sécurité §8• §fCréation requise §8• §e/register <motdepasse>"
+                                );
+                            }
 
                         },
                         35L
@@ -708,13 +712,4 @@ public class AuthListener
                 );
     }
 
-    @EventHandler
-    public void onQuit(
-            PlayerQuitEvent e
-    ) {
-
-        logout(
-                e.getPlayer()
-        );
-    }
-}
+    @
