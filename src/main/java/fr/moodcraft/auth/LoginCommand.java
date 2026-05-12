@@ -1,5 +1,6 @@
 package fr.moodcraft.auth;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 
 import org.bukkit.command.Command;
@@ -7,6 +8,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import org.bukkit.entity.Player;
+
+import java.lang.reflect.Method;
 
 import java.util.Map;
 import java.util.UUID;
@@ -41,7 +44,7 @@ public class LoginCommand
         if (AuthListener.isLogged(p)) {
 
             p.sendMessage("");
-            p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+            p.sendMessage("§8----- §6Sécurité §aMood§6Craft §8-----");
             p.sendMessage("§a✔ §fVous êtes déjà connecté.");
             p.sendMessage("");
 
@@ -54,7 +57,7 @@ public class LoginCommand
         )) {
 
             p.sendMessage("");
-            p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+            p.sendMessage("§8----- §6Sécurité §aMood§6Craft §8-----");
             p.sendMessage("§fAucun compte trouvé.");
             p.sendMessage("");
             p.sendMessage("§7Commande : §e/register <motdepasse>");
@@ -75,7 +78,7 @@ public class LoginCommand
         if (args.length < 1) {
 
             p.sendMessage("");
-            p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+            p.sendMessage("§8----- §6Sécurité §aMood§6Craft §8-----");
             p.sendMessage("§cMot de passe manquant.");
             p.sendMessage("");
             p.sendMessage("§7Commande : §e/login <motdepasse>");
@@ -115,7 +118,7 @@ public class LoginCommand
                     );
 
             p.sendMessage("");
-            p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
+            p.sendMessage("§8----- §6Sécurité §aMood§6Craft §8-----");
 
             if (attempts >= MAX_ATTEMPTS) {
 
@@ -151,6 +154,61 @@ public class LoginCommand
 
         AuthListener.login(p);
 
+        //
+        // 📬 ALERTES MOODBUSINESS
+        // Envoyées uniquement après /login réussi.
+        // Utilise reflection pour éviter de rendre MoodAuth dépendant de MoodBusiness au compile.
+        //
+
+        sendMoodBusinessAlerts(p);
+
         return true;
+    }
+
+    //
+    // 📬 MOODBUSINESS HOOK
+    //
+
+    private void sendMoodBusinessAlerts(
+            Player p
+    ) {
+
+        if (!Bukkit.getPluginManager()
+                .isPluginEnabled("MoodBusiness")) {
+            return;
+        }
+
+        Bukkit.getScheduler().runTaskLater(
+                Bukkit.getPluginManager()
+                        .getPlugin("MoodAuth"),
+                () -> {
+
+                    try {
+
+                        Class<?> api =
+                                Class.forName(
+                                        "fr.moodcraft.business.api.MoodBusinessAPI"
+                                );
+
+                        Method method =
+                                api.getMethod(
+                                        "sendPendingAlerts",
+                                        Player.class
+                                );
+
+                        method.invoke(
+                                null,
+                                p
+                        );
+
+                    } catch (Exception ignored) {
+
+                        Bukkit.getConsoleSender().sendMessage(
+                                "§c[MoodAuth] Impossible d'envoyer les alertes MoodBusiness."
+                        );
+                    }
+                },
+                20L
+        );
     }
 }
