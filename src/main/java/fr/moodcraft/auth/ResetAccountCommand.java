@@ -53,21 +53,9 @@ public class ResetAccountCommand
         OfflinePlayer target =
                 Bukkit.getOfflinePlayer(args[0]);
 
-        boolean reset =
-                AuthManager.reset(
-                        target.getUniqueId().toString()
-                );
-
-        if (!reset) {
-
-            AuthMessages.error(
-                    sender,
-                    "Sécurité " + AuthMessages.brand(),
-                    "Impossible de réinitialiser ce compte."
-            );
-
-            return true;
-        }
+        AuthManager.unregister(
+                target.getUniqueId().toString()
+        );
 
         AuthMessages.header(
                 sender,
