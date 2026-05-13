@@ -1,5 +1,7 @@
 package fr.moodcraft.auth;
 
+import fr.moodcraft.auth.util.AuthMessages;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 
@@ -43,27 +45,35 @@ public class LoginCommand
 
         if (AuthListener.isLogged(p)) {
 
-            p.sendMessage("");
-            p.sendMessage("§8----- §6Sécurité §aMood§6Craft §8-----");
-            p.sendMessage("§a✔ §fVous êtes déjà connecté.");
-            p.sendMessage("");
+            AuthMessages.success(
+                    p,
+                    "Sécurité " + AuthMessages.brand(),
+                    "Vous êtes déjà connecté."
+            );
 
             return true;
         }
 
         if (!AuthManager.isRegistered(
-                p.getUniqueId()
-                        .toString()
+                p.getUniqueId().toString()
         )) {
 
+            AuthMessages.header(
+                    p,
+                    "Sécurité " + AuthMessages.brand()
+            );
+
+            p.sendMessage("§c✘ §fAucun compte trouvé.");
             p.sendMessage("");
-            p.sendMessage("§8----- §6Sécurité §aMood§6Craft §8-----");
-            p.sendMessage("§fAucun compte trouvé.");
+            p.sendMessage("§7Créez votre compte avec:");
+            p.sendMessage("§e/register <motdepasse>");
             p.sendMessage("");
-            p.sendMessage("§7Commande : §e/register <motdepasse>");
-            p.sendMessage("");
-            p.sendMessage("§8Créez votre compte pour protéger votre progression.");
-            p.sendMessage("");
+            AuthMessages.line(
+                    p,
+                    "Votre compte protège votre progression"
+            );
+
+            AuthMessages.footer(p);
 
             p.playSound(
                     p.getLocation(),
@@ -77,12 +87,17 @@ public class LoginCommand
 
         if (args.length < 1) {
 
+            AuthMessages.header(
+                    p,
+                    "Sécurité " + AuthMessages.brand()
+            );
+
+            p.sendMessage("§c✘ §fMot de passe manquant.");
             p.sendMessage("");
-            p.sendMessage("§8----- §6Sécurité §aMood§6Craft §8-----");
-            p.sendMessage("§cMot de passe manquant.");
-            p.sendMessage("");
-            p.sendMessage("§7Commande : §e/login <motdepasse>");
-            p.sendMessage("");
+            p.sendMessage("§7Utilisation:");
+            p.sendMessage("§e/login <motdepasse>");
+
+            AuthMessages.footer(p);
 
             p.playSound(
                     p.getLocation(),
@@ -101,8 +116,7 @@ public class LoginCommand
 
         boolean success =
                 AuthManager.login(
-                        p.getUniqueId()
-                                .toString(),
+                        p.getUniqueId().toString(),
                         p.getName(),
                         args[0],
                         ip
@@ -117,26 +131,34 @@ public class LoginCommand
                             Integer::sum
                     );
 
-            p.sendMessage("");
-            p.sendMessage("§8----- §6Sécurité §aMood§6Craft §8-----");
+            AuthMessages.header(
+                    p,
+                    "Sécurité " + AuthMessages.brand()
+            );
 
             if (attempts >= MAX_ATTEMPTS) {
 
-                p.sendMessage("§cTrop de tentatives incorrectes.");
-                p.sendMessage("§7Veuillez contacter un membre du staff");
-                p.sendMessage("§7via un §eticket Discord§7.");
+                p.sendMessage("§c✘ §fTrop de tentatives.");
                 p.sendMessage("");
-                p.sendMessage("§8Le staff pourra vérifier votre compte.");
+                p.sendMessage("§7Contactez le staff");
+                p.sendMessage("§7via un ticket Discord.");
+                p.sendMessage("");
+                AuthMessages.line(
+                        p,
+                        "Le staff pourra vérifier votre compte"
+                );
 
             } else {
 
-                p.sendMessage("§cMot de passe incorrect.");
+                p.sendMessage("§c✘ §fMot de passe incorrect.");
                 p.sendMessage("");
-                p.sendMessage("§7Commande : §e/login <motdepasse>");
-                p.sendMessage("§8Tentative : §e" + attempts + "§8/§e" + MAX_ATTEMPTS);
+                p.sendMessage("§7Utilisation:");
+                p.sendMessage("§e/login <motdepasse>");
+                p.sendMessage("");
+                p.sendMessage("§7Tentative: §e" + attempts + "§8/§e" + MAX_ATTEMPTS);
             }
 
-            p.sendMessage("");
+            AuthMessages.footer(p);
 
             p.playSound(
                     p.getLocation(),
@@ -154,20 +176,10 @@ public class LoginCommand
 
         AuthListener.login(p);
 
-        //
-        // 📬 ALERTES MOODBUSINESS
-        // Envoyées uniquement après /login réussi.
-        // Utilise reflection pour éviter de rendre MoodAuth dépendant de MoodBusiness au compile.
-        //
-
         sendMoodBusinessAlerts(p);
 
         return true;
     }
-
-    //
-    // 📬 MOODBUSINESS HOOK
-    //
 
     private void sendMoodBusinessAlerts(
             Player p
@@ -178,9 +190,12 @@ public class LoginCommand
             return;
         }
 
+        if (Main.getInstance() == null) {
+            return;
+        }
+
         Bukkit.getScheduler().runTaskLater(
-                Bukkit.getPluginManager()
-                        .getPlugin("MoodAuth"),
+                Main.getInstance(),
                 () -> {
 
                     try {
