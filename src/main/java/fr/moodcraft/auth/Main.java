@@ -15,6 +15,15 @@ public class Main extends JavaPlugin {
         return instance;
     }
 
+    //
+    // Compatibilité avec l'ancien code AuthManager
+    //
+
+    public static Main get() {
+
+        return instance;
+    }
+
     @Override
     public void onEnable() {
 
@@ -22,7 +31,7 @@ public class Main extends JavaPlugin {
 
         saveDefaultConfig();
 
-        AuthManager.init(this);
+        AuthManager.init();
 
         registerCommands();
         registerListeners();
