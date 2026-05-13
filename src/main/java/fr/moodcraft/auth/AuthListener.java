@@ -25,7 +25,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,6 +36,12 @@ public class AuthListener
 
     private static final Set<UUID> logged =
             new HashSet<>();
+
+    private static final Set<UUID> blocked =
+            new HashSet<>();
+
+    private static final Map<UUID, Integer> failedAttempts =
+            new HashMap<>();
 
     public static boolean isLogged(
             Player player
@@ -44,6 +52,87 @@ public class AuthListener
         );
     }
 
+    public static boolean isBlocked(
+            Player player
+    ) {
+
+        return blocked.contains(
+                player.getUniqueId()
+        );
+    }
+
+    public static int registerFailedAttempt(
+            Player player
+    ) {
+
+        int amount =
+                failedAttempts.getOrDefault(
+                        player.getUniqueId(),
+                        0
+                ) + 1;
+
+        failedAttempts.put(
+                player.getUniqueId(),
+                amount
+        );
+
+        if (amount >= 3) {
+
+            blocked.add(
+                    player.getUniqueId()
+            );
+        }
+
+        return amount;
+    }
+
+    public static void resetFailedAttempts(
+            Player player
+    ) {
+
+        failedAttempts.remove(
+                player.getUniqueId()
+        );
+
+        blocked.remove(
+                player.getUniqueId()
+        );
+    }
+
+    public static void sendFailedAttemptMessage(
+            Player player,
+            int attempts
+    ) {
+
+        AuthMessages.header(
+                player,
+                "Sécurité " + AuthMessages.brand()
+        );
+
+        player.sendMessage("§c✘ §fMot de passe incorrect.");
+        player.sendMessage("");
+        player.sendMessage("§7Tentative: §e" + attempts + "§8/§e3");
+
+        AuthMessages.footer(player);
+    }
+
+    public static void sendBlockedMessage(
+            Player player
+    ) {
+
+        AuthMessages.header(
+                player,
+                "Sécurité " + AuthMessages.brand()
+        );
+
+        player.sendMessage("§c✘ §fCompte temporairement bloqué.");
+        player.sendMessage("");
+        player.sendMessage("§7Contactez le staff");
+        player.sendMessage("§7via un ticket Discord.");
+
+        AuthMessages.footer(player);
+    }
+
     public static void login(
             Player player
     ) {
@@ -52,12 +141,14 @@ public class AuthListener
                 player.getUniqueId()
         );
 
+        resetFailedAttempts(player);
+
         player.removePotionEffect(
                 PotionEffectType.BLINDNESS
         );
 
         player.removePotionEffect(
-                PotionEffectType.SLOWNESS
+                PotionEffectType.SLOW
         );
 
         AuthMessages.header(
@@ -92,6 +183,15 @@ public class AuthListener
         );
     }
 
+    public static void logout(
+            Player player
+    ) {
+
+        logged.remove(
+                player.getUniqueId()
+        );
+    }
+
     @EventHandler
     public void onJoin(
             PlayerJoinEvent e
@@ -117,7 +217,7 @@ public class AuthListener
 
         p.addPotionEffect(
                 new PotionEffect(
-                        PotionEffectType.SLOWNESS,
+                        PotionEffectType.SLOW,
                         Integer.MAX_VALUE,
                         4,
                         false,
@@ -138,8 +238,8 @@ public class AuthListener
             PlayerQuitEvent e
     ) {
 
-        logged.remove(
-                e.getPlayer().getUniqueId()
+        logout(
+                e.getPlayer()
         );
     }
 
@@ -152,6 +252,10 @@ public class AuthListener
                 e.getPlayer();
 
         if (isLogged(p)) {
+            return;
+        }
+
+        if (e.getTo() == null) {
             return;
         }
 
