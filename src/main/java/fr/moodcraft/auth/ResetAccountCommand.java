@@ -1,13 +1,17 @@
-
 package fr.moodcraft.auth;
+
+import fr.moodcraft.auth.util.AuthMessages;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
-import org.bukkit.command.*;
-import org.bukkit.entity.Player;
 
-public class ResetAccountCommand implements CommandExecutor {
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+
+public class ResetAccountCommand
+        implements CommandExecutor {
 
     @Override
     public boolean onCommand(
@@ -17,87 +21,89 @@ public class ResetAccountCommand implements CommandExecutor {
             String[] args
     ) {
 
-        if (!sender.hasPermission("moodauth.admin")) {
-            sender.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
-            sender.sendMessage("§c✖ §fPermission refusée.");
+        if (!sender.hasPermission("moodauth.admin")
+                && !sender.hasPermission("moodcraft.admin")) {
+
+            AuthMessages.error(
+                    sender,
+                    "Sécurité " + AuthMessages.brand(),
+                    "Accès réservé à l'administration."
+            );
+
             return true;
         }
 
         if (args.length < 1) {
-            sender.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
-            sender.sendMessage("§c⚠ §fJoueur manquant.");
-            sender.sendMessage("§7Utilisation : §e/resetcompte <joueur>");
+
+            AuthMessages.header(
+                    sender,
+                    "Sécurité " + AuthMessages.brand()
+            );
+
+            sender.sendMessage("§fRéinitialiser un compte.");
+            sender.sendMessage("");
+            sender.sendMessage("§7Utilisation:");
+            sender.sendMessage("§e/resetcompte <joueur>");
+
+            AuthMessages.footer(sender);
+
             return true;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+        OfflinePlayer target =
+                Bukkit.getOfflinePlayer(args[0]);
 
-        if (target.getName() == null && !target.hasPlayedBefore()) {
-            sender.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
-            sender.sendMessage("§c✖ §fJoueur introuvable.");
+        boolean reset =
+                AuthManager.reset(
+                        target.getUniqueId().toString()
+                );
+
+        if (!reset) {
+
+            AuthMessages.error(
+                    sender,
+                    "Sécurité " + AuthMessages.brand(),
+                    "Impossible de réinitialiser ce compte."
+            );
+
             return true;
         }
 
-        AuthManager.unregister(
-                target.getUniqueId().toString()
+        AuthMessages.header(
+                sender,
+                "Sécurité " + AuthMessages.brand()
         );
 
-        if (target.isOnline()) {
+        sender.sendMessage("§a✔ §fCompte réinitialisé.");
+        sender.sendMessage("");
+        sender.sendMessage("§7Joueur: §e" + safeName(target));
+        sender.sendMessage("");
+        AuthMessages.line(
+                sender,
+                "Le joueur devra refaire /register"
+        );
 
-            Player p = target.getPlayer();
+        AuthMessages.footer(sender);
 
-            if (p != null) {
+        if (sender instanceof org.bukkit.entity.Player p) {
 
-                AuthListener.logout(p);
-
-                p.addPotionEffect(
-                        new org.bukkit.potion.PotionEffect(
-                                org.bukkit.potion.PotionEffectType.BLINDNESS,
-                                9999,
-                                1
-                        )
-                );
-
-                p.addPotionEffect(
-                        new org.bukkit.potion.PotionEffect(
-                                org.bukkit.potion.PotionEffectType.SLOW,
-                                9999,
-                                10
-                        )
-                );
-
-                for (int i = 0; i < 80; i++) {
-                    p.sendMessage("");
-                }
-
-                p.sendTitle(
-                        "§cCompte réinitialisé",
-                        "§7Crée un nouvel accès",
-                        10,
-                        60,
-                        10
-                );
-
-                p.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
-                p.sendMessage("§c🔒 §fCompte réinitialisé.");
-                p.sendMessage("§7Ton ancien accès a été supprimé.");
-                p.sendMessage("");
-                p.sendMessage("§6➜ §e/register <motdepasse>");
-                p.sendMessage("");
-
-                p.playSound(
-                        p.getLocation(),
-                        Sound.BLOCK_ANVIL_BREAK,
-                        1f,
-                        0.8f
-                );
-            }
+            p.playSound(
+                    p.getLocation(),
+                    Sound.BLOCK_NOTE_BLOCK_PLING,
+                    0.8f,
+                    1.2f
+            );
         }
 
-        sender.sendMessage("§8----- §6Sécurité MoodCraft §8-----");
-        sender.sendMessage("§a✔ §fCompte auth réinitialisé.");
-        sender.sendMessage("§7Joueur : §e" + target.getName());
-
         return true;
+    }
+
+    private String safeName(
+            OfflinePlayer player
+    ) {
+
+        return player.getName() != null
+                ? player.getName()
+                : "Inconnu";
     }
 }
