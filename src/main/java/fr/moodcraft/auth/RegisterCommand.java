@@ -101,24 +101,12 @@ public class RegisterCommand
                         .getAddress()
                         .getHostAddress();
 
-        boolean created =
-                AuthManager.register(
-                        p.getUniqueId().toString(),
-                        p.getName(),
-                        password,
-                        ip
-                );
-
-        if (!created) {
-
-            AuthMessages.error(
-                    p,
-                    "Sécurité " + AuthMessages.brand(),
-                    "Impossible de créer votre compte."
-            );
-
-            return true;
-        }
+        AuthManager.register(
+                p.getUniqueId().toString(),
+                p.getName(),
+                password,
+                ip
+        );
 
         AuthListener.login(p);
 
