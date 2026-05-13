@@ -249,7 +249,7 @@ public class AuthListener
 
         logout(p);
 
-        p.setJoinMessage(
+        e.setJoinMessage(
                 "§a[+] §f" + p.getName() + " §7a rejoint §aMood§6Craft"
         );
 
