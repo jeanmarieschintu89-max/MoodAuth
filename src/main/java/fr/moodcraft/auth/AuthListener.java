@@ -1,16 +1,19 @@
 package fr.moodcraft.auth;
 
+import fr.moodcraft.auth.util.AuthMessages;
+
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.Sound;
 
 import org.bukkit.entity.Player;
 
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -22,238 +25,74 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class AuthListener
         implements Listener {
 
     private static final Set<UUID> logged =
-            ConcurrentHashMap.newKeySet();
-
-    private static final Map<UUID, Integer> failedAttempts =
-            new ConcurrentHashMap<>();
-
-    private static final Set<UUID> blocked =
-            ConcurrentHashMap.newKeySet();
-
-    private static final int MAX_ATTEMPTS =
-            3;
+            new HashSet<>();
 
     public static boolean isLogged(
-            Player p
+            Player player
     ) {
 
         return logged.contains(
-                p.getUniqueId()
+                player.getUniqueId()
         );
-    }
-
-    public static boolean isBlocked(
-            Player p
-    ) {
-
-        return blocked.contains(
-                p.getUniqueId()
-        );
-    }
-
-    public static int registerFailedAttempt(
-            Player p
-    ) {
-
-        int attempts =
-                failedAttempts.merge(
-                        p.getUniqueId(),
-                        1,
-                        Integer::sum
-                );
-
-        if (attempts >= MAX_ATTEMPTS) {
-
-            blocked.add(
-                    p.getUniqueId()
-            );
-        }
-
-        return attempts;
-    }
-
-    public static void resetFailedAttempts(
-            Player p
-    ) {
-
-        failedAttempts.remove(
-                p.getUniqueId()
-        );
-
-        blocked.remove(
-                p.getUniqueId()
-        );
-    }
-
-    public static void sendFailedAttemptMessage(
-            Player p,
-            int attempts
-    ) {
-
-        p.sendMessage("");
-        p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
-        p.sendMessage("");
-
-        if (attempts >= MAX_ATTEMPTS) {
-
-            sendStaffMessageContent(p);
-
-        } else {
-
-            p.sendMessage("§cMot de passe incorrect.");
-            p.sendMessage("§8Tentative : §e" + attempts + "§8/§e" + MAX_ATTEMPTS);
-            p.sendMessage("");
-            p.sendMessage("§6➜ §e/login <motdepasse> §7réessayer");
-            p.sendMessage("§6➜ §e/discord §7support et ticket");
-            p.sendMessage("§6➜ §e/site §7site officiel");
-        }
-
-        p.sendMessage("");
-
-        p.playSound(
-                p.getLocation(),
-                Sound.BLOCK_NOTE_BLOCK_BASS,
-                0.8f,
-                0.8f
-        );
-    }
-
-    public static void sendBlockedMessage(
-            Player p
-    ) {
-
-        p.sendMessage("");
-        p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
-        p.sendMessage("");
-        sendStaffMessageContent(p);
-        p.sendMessage("");
-
-        p.playSound(
-                p.getLocation(),
-                Sound.BLOCK_NOTE_BLOCK_BASS,
-                0.8f,
-                0.8f
-        );
-    }
-
-    private static void sendStaffMessageContent(
-            Player p
-    ) {
-
-        p.sendMessage("§cTrop de tentatives incorrectes.");
-        p.sendMessage("§7Veuillez contacter un membre du staff");
-        p.sendMessage("§7via un §eticket Discord§7.");
-        p.sendMessage("");
-        p.sendMessage("§6➜ §e/discord §7support et ticket");
-        p.sendMessage("§6➜ §e/site §7site officiel");
-        p.sendMessage("");
-        p.sendMessage("§8Le staff pourra vérifier votre compte.");
-    }
-
-    private static void clearChat(
-            Player p
-    ) {
-
-        for (int i = 0; i < 60; i++) {
-            p.sendMessage("");
-        }
     }
 
     public static void login(
-            Player p
+            Player player
     ) {
 
-        if (isLogged(p)) {
-            return;
-        }
-
-        Bukkit.getScheduler()
-                .runTask(
-                        Main.get(),
-                        () -> {
-
-                            if (!p.isOnline()) {
-                                return;
-                            }
-
-                            if (isLogged(p)) {
-                                return;
-                            }
-
-                            logged.add(
-                                    p.getUniqueId()
-                            );
-
-                            resetFailedAttempts(p);
-
-                            p.removePotionEffect(
-                                    PotionEffectType.BLINDNESS
-                            );
-
-                            p.removePotionEffect(
-                                    PotionEffectType.SLOW
-                            );
-
-                            clearChat(p);
-
-                            p.spawnParticle(
-                                    Particle.END_ROD,
-                                    p.getLocation()
-                                            .add(0, 1, 0),
-                                    40,
-                                    0.45,
-                                    0.7,
-                                    0.45,
-                                    0
-                            );
-
-                            p.sendActionBar(
-                                    "§a✔ §fConnexion confirmée §8• §eBienvenue sur MoodCraft"
-                            );
-
-                            p.sendMessage("");
-                            p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
-                            p.sendMessage("");
-                            p.sendMessage("§7Bienvenue, §e" + p.getName() + "§7.");
-                            p.sendMessage("");
-                            p.sendMessage("§a✔ §fConnexion confirmée.");
-                            p.sendMessage("§6➜ §e/menu §7ouvrir le menu principal");
-                            p.sendMessage("§6➜ §e/menuville §7ouvrir le menu ville");
-                            p.sendMessage("");
-                            p.sendMessage("§8Votre compte protège votre progression sur MoodCraft.");
-                            p.sendMessage("");
-
-                            p.playSound(
-                                    p.getLocation(),
-                                    Sound.UI_TOAST_CHALLENGE_COMPLETE,
-                                    0.8f,
-                                    1.1f
-                            );
-                        }
-                );
-    }
-
-    public static void logout(
-            Player p
-    ) {
-
-        logged.remove(
-                p.getUniqueId()
+        logged.add(
+                player.getUniqueId()
         );
 
-        resetFailedAttempts(p);
+        player.removePotionEffect(
+                PotionEffectType.BLINDNESS
+        );
+
+        player.removePotionEffect(
+                PotionEffectType.SLOWNESS
+        );
+
+        AuthMessages.header(
+                player,
+                "Sécurité " + AuthMessages.brand()
+        );
+
+        player.sendMessage("§a✔ §fConnexion confirmée.");
+        player.sendMessage("");
+        player.sendMessage("§7Bienvenue sur §aMood§6Craft§7.");
+        player.sendMessage("");
+        AuthMessages.line(
+                player,
+                "Menu principal: §e/menu"
+        );
+        AuthMessages.line(
+                player,
+                "Menu ville: §e/menuville"
+        );
+        AuthMessages.line(
+                player,
+                "Votre compte protège votre progression"
+        );
+
+        AuthMessages.footer(player);
+
+        player.playSound(
+                player.getLocation(),
+                Sound.UI_TOAST_CHALLENGE_COMPLETE,
+                0.8f,
+                1.1f
+        );
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onJoin(
             PlayerJoinEvent e
     ) {
@@ -261,238 +100,47 @@ public class AuthListener
         Player p =
                 e.getPlayer();
 
-        logout(p);
-
-        e.setJoinMessage(
-                "§8[§a+§8] §e" + p.getName() + " §7a rejoint §aMood§eCraft"
+        logged.remove(
+                p.getUniqueId()
         );
 
         p.addPotionEffect(
                 new PotionEffect(
                         PotionEffectType.BLINDNESS,
-                        9999,
-                        1
+                        Integer.MAX_VALUE,
+                        1,
+                        false,
+                        false,
+                        false
                 )
         );
 
         p.addPotionEffect(
                 new PotionEffect(
-                        PotionEffectType.SLOW,
-                        9999,
-                        10
+                        PotionEffectType.SLOWNESS,
+                        Integer.MAX_VALUE,
+                        4,
+                        false,
+                        false,
+                        false
                 )
         );
 
-        startAura(p);
-
-        Bukkit.getScheduler()
-                .runTaskLater(
-                        Main.get(),
-                        () -> {
-
-                            if (!p.isOnline()) {
-                                return;
-                            }
-
-                            if (isLogged(p)) {
-                                return;
-                            }
-
-                            if (AuthManager.isRegistered(
-                                    p.getUniqueId()
-                                            .toString()
-                            )) {
-
-                                p.sendActionBar(
-                                        "§6Sécurité §8• §fConnexion requise §8• §e/login <motdepasse>"
-                                );
-
-                            } else {
-
-                                p.sendActionBar(
-                                        "§6Sécurité §8• §fCréation requise §8• §e/register <motdepasse>"
-                                );
-                            }
-
-                        },
-                        35L
-                );
-
-        Bukkit.getScheduler()
-                .runTaskLater(
-                        Main.get(),
-                        () -> {
-
-                            if (!p.isOnline()) {
-                                return;
-                            }
-
-                            if (isLogged(p)) {
-                                return;
-                            }
-
-                            clearChat(p);
-
-                            if (AuthManager.isRegistered(
-                                    p.getUniqueId()
-                                            .toString()
-                            )) {
-
-                                sendLoginMessage(p);
-                                startLoginActionBar(p);
-
-                            } else {
-
-                                sendRegisterMessage(p);
-                                startRegisterActionBar(p);
-                            }
-
-                        },
-                        70L
-                );
+        Bukkit.getScheduler().runTaskLater(
+                Main.getInstance(),
+                () -> sendLoginHint(p),
+                20L
+        );
     }
 
-    private void sendLoginMessage(
-            Player p
+    @EventHandler
+    public void onQuit(
+            PlayerQuitEvent e
     ) {
 
-        p.sendMessage("");
-        p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
-        p.sendMessage("");
-        p.sendMessage("§fVeuillez vous connecter.");
-        p.sendMessage("");
-        p.sendMessage("§6➜ §e/login <motdepasse> §7connexion au compte");
-        p.sendMessage("§6➜ §e/discord §7support et communauté");
-        p.sendMessage("§6➜ §e/site §7site officiel");
-        p.sendMessage("");
-        p.sendMessage("§8Votre compte protège votre progression sur MoodCraft.");
-        p.sendMessage("");
-    }
-
-    private void sendRegisterMessage(
-            Player p
-    ) {
-
-        p.sendMessage("");
-        p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
-        p.sendMessage("");
-        p.sendMessage("§fVeuillez créer votre compte.");
-        p.sendMessage("");
-        p.sendMessage("§6➜ §e/register <motdepasse> §7création du compte");
-        p.sendMessage("§6➜ §e/discord §7support et communauté");
-        p.sendMessage("§6➜ §e/site §7site officiel");
-        p.sendMessage("");
-        p.sendMessage("§8Ce compte protège votre progression sur MoodCraft.");
-        p.sendMessage("");
-    }
-
-    private void startLoginActionBar(
-            Player p
-    ) {
-
-        Bukkit.getScheduler()
-                .runTaskTimer(
-                        Main.get(),
-                        task -> {
-
-                            if (isLogged(p) || !p.isOnline()) {
-
-                                task.cancel();
-                                return;
-                            }
-
-                            if (isBlocked(p)) {
-
-                                p.sendActionBar(
-                                        "§6Sécurité §8• §cTrop de tentatives §8• §e/discord"
-                                );
-
-                                return;
-                            }
-
-                            p.sendActionBar(
-                                    "§6Sécurité §8• §fConnexion requise §8• §e/login <motdepasse>"
-                            );
-
-                        },
-                        0L,
-                        40L
-                );
-    }
-
-    private void startRegisterActionBar(
-            Player p
-    ) {
-
-        Bukkit.getScheduler()
-                .runTaskTimer(
-                        Main.get(),
-                        task -> {
-
-                            if (isLogged(p) || !p.isOnline()) {
-
-                                task.cancel();
-                                return;
-                            }
-
-                            p.sendActionBar(
-                                    "§6Sécurité §8• §fCréation requise §8• §e/register <motdepasse>"
-                            );
-
-                        },
-                        0L,
-                        40L
-                );
-    }
-
-    private void startAura(
-            Player p
-    ) {
-
-        Bukkit.getScheduler()
-                .runTaskTimer(
-                        Main.get(),
-                        task -> {
-
-                            if (isLogged(p) || !p.isOnline()) {
-
-                                task.cancel();
-                                return;
-                            }
-
-                            Location loc =
-                                    p.getLocation()
-                                            .clone()
-                                            .add(0, 1, 0);
-
-                            for (int i = 0; i < 8; i++) {
-
-                                double angle =
-                                        2 * Math.PI * i / 8;
-
-                                double x =
-                                        Math.cos(angle) * 0.75;
-
-                                double z =
-                                        Math.sin(angle) * 0.75;
-
-                                p.getWorld()
-                                        .spawnParticle(
-                                                Particle.END_ROD,
-                                                loc.clone()
-                                                        .add(x, 0, z),
-                                                1,
-                                                0,
-                                                0,
-                                                0,
-                                                0
-                                        );
-                            }
-
-                        },
-                        0L,
-                        14L
-                );
+        logged.remove(
+                e.getPlayer().getUniqueId()
+        );
     }
 
     @EventHandler
@@ -507,33 +155,73 @@ public class AuthListener
             return;
         }
 
-        Location from =
-                e.getFrom();
+        if (e.getFrom().getX() != e.getTo().getX()
+                || e.getFrom().getZ() != e.getTo().getZ()) {
 
-        Location to =
-                e.getTo();
+            e.setTo(e.getFrom());
 
-        if (to == null) {
+            sendActionHint(p);
+        }
+    }
+
+    @EventHandler
+    public void onCommand(
+            PlayerCommandPreprocessEvent e
+    ) {
+
+        Player p =
+                e.getPlayer();
+
+        if (isLogged(p)) {
             return;
         }
 
-        if (from.getX() == to.getX()
-                && from.getY() == to.getY()
-                && from.getZ() == to.getZ()) {
+        String msg =
+                e.getMessage()
+                        .toLowerCase();
+
+        if (msg.startsWith("/login")
+                || msg.startsWith("/register")) {
             return;
         }
 
-        Location fixed =
-                new Location(
-                        from.getWorld(),
-                        from.getX(),
-                        from.getY(),
-                        from.getZ(),
-                        to.getYaw(),
-                        to.getPitch()
-                );
+        e.setCancelled(true);
 
-        e.setTo(fixed);
+        sendActionHint(p);
+    }
+
+    @EventHandler
+    public void onChat(
+            AsyncPlayerChatEvent e
+    ) {
+
+        if (isLogged(e.getPlayer())) {
+            return;
+        }
+
+        e.setCancelled(true);
+
+        sendActionHint(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onBreak(
+            BlockBreakEvent e
+    ) {
+
+        if (!isLogged(e.getPlayer())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlace(
+            BlockPlaceEvent e
+    ) {
+
+        if (!isLogged(e.getPlayer())) {
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler
@@ -548,186 +236,74 @@ public class AuthListener
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onCommand(
-            PlayerCommandPreprocessEvent e
+    @EventHandler
+    public void onDamageByEntity(
+            EntityDamageByEntityEvent e
     ) {
 
-        Player p =
-                e.getPlayer();
+        if (e.getDamager() instanceof Player p
+                && !isLogged(p)) {
+
+            e.setCancelled(true);
+        }
+    }
+
+    private void sendLoginHint(
+            Player p
+    ) {
 
         if (isLogged(p)) {
             return;
         }
 
-        String message =
-                e.getMessage()
-                        .trim()
-                        .toLowerCase();
-
-        if (isAllowedAuthCommand(message)) {
-            return;
-        }
-
-        e.setCancelled(true);
+        AuthMessages.header(
+                p,
+                "Sécurité " + AuthMessages.brand()
+        );
 
         if (AuthManager.isRegistered(
-                p.getUniqueId()
-                        .toString()
+                p.getUniqueId().toString()
         )) {
 
-            if (isBlocked(p)) {
-
-                sendBlockedMessage(p);
-                return;
-            }
-
-            sendLoginMessage(p);
+            p.sendMessage("§fConnexion requise.");
+            p.sendMessage("");
+            p.sendMessage("§7Commande:");
+            p.sendMessage("§e/login <motdepasse>");
 
         } else {
 
-            sendRegisterMessage(p);
-        }
-    }
-
-    private boolean isAllowedAuthCommand(
-            String message
-    ) {
-
-        String command =
-                message.split(" ")[0];
-
-        return command.equals("/login")
-                || command.equals("/register")
-                || command.equals("/discord")
-                || command.equals("/site")
-                || command.equals("/l");
-    }
-
-    @EventHandler(
-            priority = EventPriority.HIGHEST,
-            ignoreCancelled = true
-    )
-    public void onChat(
-            AsyncPlayerChatEvent e
-    ) {
-
-        Player p =
-                e.getPlayer();
-
-        if (p.hasMetadata("input_active")) {
-            return;
+            p.sendMessage("§fCréation de compte requise.");
+            p.sendMessage("");
+            p.sendMessage("§7Commande:");
+            p.sendMessage("§e/register <motdepasse>");
         }
 
-        if (isLogged(p)) {
-            return;
-        }
-
-        e.setCancelled(true);
-
-        String password =
-                e.getMessage();
-
-        String uuid =
-                p.getUniqueId()
-                        .toString();
-
-        String name =
-                p.getName();
-
-        String ip =
-                p.getAddress()
-                        .getAddress()
-                        .getHostAddress();
-
-        Bukkit.getScheduler()
-                .runTaskAsynchronously(
-                        Main.get(),
-                        () -> {
-
-                            if (!p.isOnline()) {
-                                return;
-                            }
-
-                            if (AuthManager.isRegistered(uuid)) {
-
-                                if (isBlocked(p)) {
-
-                                    Bukkit.getScheduler()
-                                            .runTask(
-                                                    Main.get(),
-                                                    () -> {
-
-                                                        if (!p.isOnline()) {
-                                                            return;
-                                                        }
-
-                                                        sendBlockedMessage(p);
-                                                    }
-                                            );
-
-                                    return;
-                                }
-
-                                boolean success =
-                                        AuthManager.login(
-                                                uuid,
-                                                name,
-                                                password,
-                                                ip
-                                        );
-
-                                if (success) {
-
-                                    login(p);
-                                    return;
-                                }
-
-                                int attempts =
-                                        registerFailedAttempt(p);
-
-                                Bukkit.getScheduler()
-                                        .runTask(
-                                                Main.get(),
-                                                () -> {
-
-                                                    if (!p.isOnline()) {
-                                                        return;
-                                                    }
-
-                                                    if (isLogged(p)) {
-                                                        return;
-                                                    }
-
-                                                    sendFailedAttemptMessage(
-                                                            p,
-                                                            attempts
-                                                    );
-                                                }
-                                        );
-
-                                return;
-                            }
-
-                            AuthManager.register(
-                                    uuid,
-                                    name,
-                                    password,
-                                    ip
-                            );
-
-                            login(p);
-                        }
-                );
-    }
-
-    @EventHandler
-    public void onQuit(
-            PlayerQuitEvent e
-    ) {
-
-        logout(
-                e.getPlayer()
+        p.sendMessage("");
+        AuthMessages.line(
+                p,
+                "Vous pourrez bouger après validation"
         );
+
+        AuthMessages.footer(p);
+    }
+
+    private void sendActionHint(
+            Player p
+    ) {
+
+        if (AuthManager.isRegistered(
+                p.getUniqueId().toString()
+        )) {
+
+            p.sendActionBar(
+                    "§6Sécurité §8• §fConnexion requise §8• §e/login <motdepasse>"
+            );
+
+        } else {
+
+            p.sendActionBar(
+                    "§6Sécurité §8• §fCompte requis §8• §e/register <motdepasse>"
+            );
+        }
     }
 }
