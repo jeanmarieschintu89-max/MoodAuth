@@ -17,6 +17,12 @@ commands:
   resetcompte:
     description: Réinitialiser le compte d'un joueur
     usage: /resetcompte <joueur>
+  authadmin:
+    description: Administration MoodAuth
+    usage: /authadmin
+    aliases:
+      - mauth
+      - moodauthadmin
 
 permissions:
   moodauth.admin:
