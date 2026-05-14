@@ -119,12 +119,12 @@ public class AuthListener
 
         } else {
 
-            player.sendMessage("§cMot de passe incorrect.");
-            player.sendMessage("§8Tentative : §e" + attempts + "§8/§e" + MAX_ATTEMPTS);
+            player.sendMessage("§c✖ §fMot de passe incorrect.");
+            player.sendMessage(detail("Tentative : §e" + attempts + "§8/§e" + MAX_ATTEMPTS));
             player.sendMessage("");
-            player.sendMessage("§6✦ §e/login <motdepasse> §7réessayer");
-            player.sendMessage("§6✦ §e/discord §7support et ticket");
-            player.sendMessage("§6✦ §e/site §7site officiel");
+            player.sendMessage("§e➜ §e/login <motdepasse> §7réessayer");
+            player.sendMessage("§e➜ §e/discord §7support et ticket");
+            player.sendMessage("§e➜ §e/site §7site officiel");
         }
 
         player.sendMessage("");
@@ -161,14 +161,13 @@ public class AuthListener
             Player player
     ) {
 
-        player.sendMessage("§cTrop de tentatives incorrectes.");
-        player.sendMessage("§7Veuillez contacter un membre du staff");
-        player.sendMessage("§7via un §eticket Discord§7.");
+        player.sendMessage("§c✖ §fTrop de tentatives incorrectes.");
+        player.sendMessage(detail("Contactez un membre du staff via un §eticket Discord§7."));
         player.sendMessage("");
-        player.sendMessage("§6✦ §e/discord §7support et ticket");
-        player.sendMessage("§6✦ §e/site §7site officiel");
+        player.sendMessage("§e➜ §e/discord §7support et ticket");
+        player.sendMessage("§e➜ §e/site §7site officiel");
         player.sendMessage("");
-        player.sendMessage("§8Le staff pourra vérifier votre compte.");
+        player.sendMessage(detail("Le staff pourra vérifier votre compte."));
     }
 
     public static void login(
@@ -206,14 +205,14 @@ public class AuthListener
                     player.sendMessage("");
                     player.sendMessage("§a✔ §fConnexion confirmée.");
                     player.sendMessage("");
-                    player.sendMessage("§7Bienvenue sur §aMood§6Craft§7.");
+                    player.sendMessage("§e➜ §fBienvenue sur §aMood§6Craft§f.");
                     player.sendMessage("");
-                    player.sendMessage("§6✦ §e/menu §7menu principal");
-                    player.sendMessage("§6✦ §e/menuville §7menu ville");
-                    player.sendMessage("§6✦ §e/discord §7support et communauté");
-                    player.sendMessage("§6✦ §e/site §7site officiel");
+                    player.sendMessage("§e➜ §e/menu §7menu principal");
+                    player.sendMessage("§e➜ §e/menuville §7menu ville");
+                    player.sendMessage("§e➜ §e/discord §7support et communauté");
+                    player.sendMessage("§e➜ §e/site §7site officiel");
                     player.sendMessage("");
-                    player.sendMessage("§8Votre compte protège votre progression sur MoodCraft.");
+                    player.sendMessage(detail("Votre compte protège votre progression sur MoodCraft."));
                     player.sendMessage("");
 
                     player.playSound(
@@ -303,13 +302,13 @@ public class AuthListener
         p.sendMessage("");
         p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
         p.sendMessage("");
-        p.sendMessage("§fVeuillez vous connecter.");
+        p.sendMessage("§e➜ §fVeuillez vous connecter.");
         p.sendMessage("");
-        p.sendMessage("§6✦ §e/login <motdepasse> §7connexion au compte");
-        p.sendMessage("§6✦ §e/discord §7support et communauté");
-        p.sendMessage("§6✦ §e/site §7site officiel");
+        p.sendMessage("§e➜ §e/login <motdepasse> §7connexion au compte");
+        p.sendMessage("§e➜ §e/discord §7support et communauté");
+        p.sendMessage("§e➜ §e/site §7site officiel");
         p.sendMessage("");
-        p.sendMessage("§8Votre compte protège votre progression sur MoodCraft.");
+        p.sendMessage(detail("Votre compte protège votre progression sur MoodCraft."));
         p.sendMessage("");
     }
 
@@ -320,13 +319,13 @@ public class AuthListener
         p.sendMessage("");
         p.sendMessage("§8----- §6✦ Sécurité MoodCraft ✦ §8-----");
         p.sendMessage("");
-        p.sendMessage("§fVeuillez créer votre compte.");
+        p.sendMessage("§e➜ §fVeuillez créer votre compte.");
         p.sendMessage("");
-        p.sendMessage("§6✦ §e/register <motdepasse> §7création du compte");
-        p.sendMessage("§6✦ §e/discord §7support et communauté");
-        p.sendMessage("§6✦ §e/site §7site officiel");
+        p.sendMessage("§e➜ §e/register <motdepasse> §7création du compte");
+        p.sendMessage("§e➜ §e/discord §7support et communauté");
+        p.sendMessage("§e➜ §e/site §7site officiel");
         p.sendMessage("");
-        p.sendMessage("§8Ce compte protège votre progression sur MoodCraft.");
+        p.sendMessage(detail("Ce compte protège votre progression sur MoodCraft."));
         p.sendMessage("");
     }
 
@@ -680,5 +679,9 @@ public class AuthListener
                 },
                 20L
         );
+    }
+
+    private static String detail(String text) {
+        return "§8• §7" + text;
     }
 }
