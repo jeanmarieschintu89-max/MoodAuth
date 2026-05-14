@@ -19,7 +19,7 @@ public final class AuthMessages {
         sender.sendMessage(
                 "§8----- §6✦ "
                         + cleanTitle(title)
-                        + " §6✦ §8-----"
+                        + " ✦ §8-----"
         );
     }
 
@@ -37,7 +37,7 @@ public final class AuthMessages {
     ) {
 
         header(sender, title);
-        sender.sendMessage("§a✔ §f" + message);
+        sender.sendMessage("§a✔ §f" + cleanPrefix(message));
         footer(sender);
     }
 
@@ -49,7 +49,7 @@ public final class AuthMessages {
 
         header(sender, title);
         sender.sendMessage("§c✖ §fAction refusée.");
-        sender.sendMessage("§e➜ §7" + message);
+        sender.sendMessage("§8• §7" + cleanPrefix(message));
         footer(sender);
     }
 
@@ -60,7 +60,7 @@ public final class AuthMessages {
     ) {
 
         header(sender, title);
-        sender.sendMessage("§e➜ §7" + message);
+        sender.sendMessage("§e➜ §f" + cleanPrefix(message));
         footer(sender);
     }
 
@@ -69,7 +69,7 @@ public final class AuthMessages {
             String message
     ) {
 
-        sender.sendMessage("§e➜ §7" + message);
+        sender.sendMessage("§8• §7" + cleanPrefix(message));
     }
 
     public static void command(
@@ -78,7 +78,7 @@ public final class AuthMessages {
             String description
     ) {
 
-        sender.sendMessage("§e➜ §e" + command + " §7" + description);
+        sender.sendMessage("§e➜ §e" + command + " §7" + cleanPrefix(description));
     }
 
     private static String cleanTitle(
@@ -97,6 +97,24 @@ public final class AuthMessages {
                 .replace("§7", "")
                 .replace("§8", "")
                 .replace("✦", "")
+                .trim();
+    }
+
+    private static String cleanPrefix(
+            String text
+    ) {
+
+        if (text == null) {
+            return "";
+        }
+
+        return text
+                .replaceFirst("^§[0-9a-fk-or]", "")
+                .replaceFirst("^➜\\s*", "")
+                .replaceFirst("^✔\\s*", "")
+                .replaceFirst("^✘\\s*", "")
+                .replaceFirst("^✖\\s*", "")
+                .replaceFirst("^•\\s*", "")
                 .trim();
     }
 }
