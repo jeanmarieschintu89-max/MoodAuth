@@ -15,10 +15,6 @@ public class Main extends JavaPlugin {
         return instance;
     }
 
-    //
-    // Compatibilité avec l'ancien code AuthManager
-    //
-
     public static Main get() {
 
         return instance;
@@ -44,9 +40,11 @@ public class Main extends JavaPlugin {
                 "§a✔ §fSécurité chargée."
         );
         Bukkit.getConsoleSender().sendMessage(
-                "§7Service officiel de §aMood§6Craft§7."
+                "§e➜ §7Service officiel de §aMood§6Craft§7."
         );
-        Bukkit.getConsoleSender().sendMessage("");
+        Bukkit.getConsoleSender().sendMessage(
+                "§8-----------------------------"
+        );
     }
 
     @Override
@@ -57,9 +55,11 @@ public class Main extends JavaPlugin {
                 "§8----- §6✦ §aMood§6Auth §6✦ §8-----"
         );
         Bukkit.getConsoleSender().sendMessage(
-                "§c✘ §fSécurité arrêtée."
+                "§c✖ §fSécurité arrêtée."
         );
-        Bukkit.getConsoleSender().sendMessage("");
+        Bukkit.getConsoleSender().sendMessage(
+                "§8-----------------------------"
+        );
     }
 
     private void registerCommands() {
