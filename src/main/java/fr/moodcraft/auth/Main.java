@@ -11,12 +11,10 @@ public class Main extends JavaPlugin {
     private static Main instance;
 
     public static Main getInstance() {
-
         return instance;
     }
 
     public static Main get() {
-
         return instance;
     }
 
@@ -33,75 +31,38 @@ public class Main extends JavaPlugin {
         registerListeners();
 
         Bukkit.getConsoleSender().sendMessage("");
-        Bukkit.getConsoleSender().sendMessage(
-                "§8----- §6✦ §aMood§6Auth §6✦ §8-----"
-        );
-        Bukkit.getConsoleSender().sendMessage(
-                "§a✔ §fSécurité chargée."
-        );
-        Bukkit.getConsoleSender().sendMessage(
-                "§e➜ §7Service officiel de §aMood§6Craft§7."
-        );
-        Bukkit.getConsoleSender().sendMessage(
-                "§8-----------------------------"
-        );
+        Bukkit.getConsoleSender().sendMessage("§8----- §6✦ §aMood§6Auth §6✦ §8-----");
+        Bukkit.getConsoleSender().sendMessage("§a✔ §fSécurité chargée.");
+        Bukkit.getConsoleSender().sendMessage("§e➜ §7Service officiel de §aMood§6Craft§7.");
+        Bukkit.getConsoleSender().sendMessage("§8-----------------------------");
     }
 
     @Override
     public void onDisable() {
 
         Bukkit.getConsoleSender().sendMessage("");
-        Bukkit.getConsoleSender().sendMessage(
-                "§8----- §6✦ §aMood§6Auth §6✦ §8-----"
-        );
-        Bukkit.getConsoleSender().sendMessage(
-                "§c✖ §fSécurité arrêtée."
-        );
-        Bukkit.getConsoleSender().sendMessage(
-                "§8-----------------------------"
-        );
+        Bukkit.getConsoleSender().sendMessage("§8----- §6✦ §aMood§6Auth §6✦ §8-----");
+        Bukkit.getConsoleSender().sendMessage("§c✖ §fSécurité arrêtée.");
+        Bukkit.getConsoleSender().sendMessage("§8-----------------------------");
     }
 
     private void registerCommands() {
+        registerCommand("login", new LoginCommand());
+        registerCommand("register", new RegisterCommand());
+        registerCommand("changepassword", new ChangePasswordCommand());
+        registerCommand("resetcompte", new ResetAccountCommand());
+        registerCommand("authadmin", new AuthAdminCommand());
+    }
 
-        PluginCommand login =
-                getCommand("login");
+    private void registerCommand(
+            String name,
+            org.bukkit.command.CommandExecutor executor
+    ) {
 
-        if (login != null) {
+        PluginCommand command = getCommand(name);
 
-            login.setExecutor(
-                    new LoginCommand()
-            );
-        }
-
-        PluginCommand register =
-                getCommand("register");
-
-        if (register != null) {
-
-            register.setExecutor(
-                    new RegisterCommand()
-            );
-        }
-
-        PluginCommand change =
-                getCommand("changepassword");
-
-        if (change != null) {
-
-            change.setExecutor(
-                    new ChangePasswordCommand()
-            );
-        }
-
-        PluginCommand reset =
-                getCommand("resetcompte");
-
-        if (reset != null) {
-
-            reset.setExecutor(
-                    new ResetAccountCommand()
-            );
+        if (command != null) {
+            command.setExecutor(executor);
         }
     }
 
