@@ -10,8 +10,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-public class ResetAccountCommand
-        implements CommandExecutor {
+public class ResetAccountCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(
@@ -35,63 +34,32 @@ public class ResetAccountCommand
 
         if (args.length < 1) {
 
-            AuthMessages.header(
-                    sender,
-                    "Sécurité " + AuthMessages.brand()
-            );
-
-            sender.sendMessage("§fRéinitialiser un compte.");
-            sender.sendMessage("");
-            sender.sendMessage("§7Utilisation:");
-            sender.sendMessage("§e/resetcompte <joueur>");
-
+            AuthMessages.header(sender, "Sécurité " + AuthMessages.brand());
+            AuthMessages.line(sender, "Réinitialiser un compte");
+            AuthMessages.command(sender, "/resetcompte <joueur>", "réinitialisation admin");
             AuthMessages.footer(sender);
 
             return true;
         }
 
-        OfflinePlayer target =
-                Bukkit.getOfflinePlayer(args[0]);
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
 
-        AuthManager.unregister(
-                target.getUniqueId().toString()
-        );
+        AuthManager.unregister(target.getUniqueId().toString());
 
-        AuthMessages.header(
-                sender,
-                "Sécurité " + AuthMessages.brand()
-        );
-
+        AuthMessages.header(sender, "Sécurité " + AuthMessages.brand());
         sender.sendMessage("§a✔ §fCompte réinitialisé.");
-        sender.sendMessage("");
-        sender.sendMessage("§7Joueur: §e" + safeName(target));
-        sender.sendMessage("");
-        AuthMessages.line(
-                sender,
-                "Le joueur devra refaire /register"
-        );
-
+        AuthMessages.line(sender, "Joueur : §e" + safeName(target));
+        AuthMessages.line(sender, "Le joueur devra refaire /register");
         AuthMessages.footer(sender);
 
         if (sender instanceof org.bukkit.entity.Player p) {
-
-            p.playSound(
-                    p.getLocation(),
-                    Sound.BLOCK_NOTE_BLOCK_PLING,
-                    0.8f,
-                    1.2f
-            );
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.2f);
         }
 
         return true;
     }
 
-    private String safeName(
-            OfflinePlayer player
-    ) {
-
-        return player.getName() != null
-                ? player.getName()
-                : "Inconnu";
+    private String safeName(OfflinePlayer player) {
+        return player.getName() != null ? player.getName() : "Inconnu";
     }
 }
