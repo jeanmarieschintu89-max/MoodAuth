@@ -7,7 +7,6 @@ public final class AuthMessages {
     private AuthMessages() {}
 
     public static String brand() {
-
         return "§aMood§6Craft";
     }
 
@@ -22,16 +21,13 @@ public final class AuthMessages {
                         + cleanTitle(title)
                         + " §6✦ §8-----"
         );
-        sender.sendMessage("");
     }
 
     public static void footer(
             CommandSender sender
     ) {
 
-        sender.sendMessage("");
         sender.sendMessage("§8-----------------------------");
-        sender.sendMessage("");
     }
 
     public static void success(
@@ -52,9 +48,8 @@ public final class AuthMessages {
     ) {
 
         header(sender, title);
-        sender.sendMessage("§c✘ §fAction refusée.");
-        sender.sendMessage("");
-        sender.sendMessage("§7" + message);
+        sender.sendMessage("§c✖ §fAction refusée.");
+        sender.sendMessage("§e➜ §7" + message);
         footer(sender);
     }
 
@@ -65,7 +60,7 @@ public final class AuthMessages {
     ) {
 
         header(sender, title);
-        sender.sendMessage("§7" + message);
+        sender.sendMessage("§e➜ §7" + message);
         footer(sender);
     }
 
@@ -74,7 +69,16 @@ public final class AuthMessages {
             String message
     ) {
 
-        sender.sendMessage("§8• §7" + message);
+        sender.sendMessage("§e➜ §7" + message);
+    }
+
+    public static void command(
+            CommandSender sender,
+            String command,
+            String description
+    ) {
+
+        sender.sendMessage("§e➜ §e" + command + " §7" + description);
     }
 
     private static String cleanTitle(
