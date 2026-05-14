@@ -1,30 +1,36 @@
-name: MoodAuth
-version: 1.0
-main: fr.moodcraft.auth.Main
+name: MoodLock
+version: 1.0.1
+main: fr.moodcraft.lock.MoodLock
 api-version: '1.21'
-author: MoodCraft
 
 commands:
-  login:
-    description: Connexion au compte MoodCraft
-    usage: /login <motdepasse>
-  register:
-    description: Création du compte MoodCraft
-    usage: /register <motdepasse>
-  changepassword:
-    description: Changer son mot de passe
-    usage: /changepassword <ancien> <nouveau>
-  resetcompte:
-    description: Réinitialiser le compte d'un joueur
-    usage: /resetcompte <joueur>
-  authadmin:
-    description: Administration MoodAuth
-    usage: /authadmin
+  lock:
+    description: Verrouiller un coffre
+  unlock:
+    description: Déverrouiller son coffre
+  adminunlock:
+    description: Déverrouiller un coffre de force
+  locktp:
+    description: Se téléporter aux coffres verrouillés
+  lockadd:
+    description: Ajouter un membre au coffre
+  lockdel:
+    description: Retirer un membre du coffre
+  lockadmin:
+    description: Administration complète des coffres verrouillés
+    usage: /lockadmin
+    permission: moodlock.admin
     aliases:
-      - mauth
-      - moodauthadmin
+      - coffreadmin
+      - chestadmin
+      - ladmin
 
 permissions:
-  moodauth.admin:
-    description: Accès aux commandes admin MoodAuth
+  moodlock.vip:
+    default: false
+  moodlock.admin:
+    default: op
+  moodlock.adminunlock:
+    default: op
+  moodlock.locktp:
     default: op
