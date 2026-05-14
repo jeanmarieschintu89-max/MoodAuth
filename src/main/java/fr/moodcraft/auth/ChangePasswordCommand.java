@@ -24,7 +24,7 @@ public class ChangePasswordCommand
         if (!(sender instanceof Player p)) {
 
             sender.sendMessage(
-                    "§cCommande joueur uniquement."
+                    "§c✖ §fCommande joueur uniquement."
             );
 
             return true;
@@ -61,10 +61,9 @@ public class ChangePasswordCommand
                     "Sécurité " + AuthMessages.brand()
             );
 
-            p.sendMessage("§fChanger votre mot de passe.");
+            p.sendMessage("§e➜ §fChanger votre mot de passe.");
             p.sendMessage("");
-            p.sendMessage("§7Utilisation:");
-            p.sendMessage("§e/changepassword <ancien> <nouveau>");
+            p.sendMessage("§8• §7Utilisation : §e/changepassword <ancien> <nouveau>");
 
             AuthMessages.footer(p);
 
